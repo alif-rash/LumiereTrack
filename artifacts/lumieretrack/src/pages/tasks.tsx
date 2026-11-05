@@ -36,7 +36,10 @@ export default function Tasks() {
         {sel(group, setGroup, "All projects", ws.groups.map((g) => [g.id, g.title]), "project")}
         {sel(when, setWhen, "Any time", [["open", "Open only"], ["overdue", "Overdue"]], "when")}
       </div>
-      {list.length ? <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{list.map((t) => <TaskCard key={t.id} task={t} showProject />)}</div>
+      {list.length ? <div className="border-t border-foreground">
+          <div className="eyebrow hidden grid-cols-[minmax(0,2.2fr)_minmax(0,1.2fr)_96px_150px_auto] gap-x-4 border-b border-border px-1 py-2 !text-[9.5px] md:grid"><span>Task</span><span>Project and owner</span><span>Due</span><span>Status</span><span /></div>
+          {list.map((t) => <TaskCard key={t.id} task={t} showProject row />)}
+        </div>
         : <Empty icon={<ListChecks className="h-5 w-5" />} title={base.length ? "No tasks match these filters" : "No tasks yet"} body={base.length ? "Try clearing a filter." : "Tasks you own in project groups will collect here."} />}
     </>
   );

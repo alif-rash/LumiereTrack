@@ -23,8 +23,8 @@ export default function Onboarding() {
       <div className="mx-auto max-w-2xl px-5 py-10">
         <Brand />
         <div className="rise mt-14">
-          <div className="text-xs font-bold uppercase tracking-[0.16em] text-primary">Step {role ? 2 : 1} of 2</div>
-          <h1 className="mt-3 text-4xl font-extrabold text-[hsl(var(--navy))]">{role ? "Tell us where you teach or study." : "How will you use LumiereTrack?"}</h1>
+          <div className="eyebrow">Step {role ? 2 : 1} of 2</div>
+          <h1 className="mt-3 text-4xl md:text-5xl leading-[1.05]">{role ? "Tell us where you teach or study." : "How will you use LumiereTrack?"}</h1>
           <p className="mt-2 text-muted-foreground">{role ? "This appears on reports and helps classmates recognise you." : "Choose carefully — your role is set once and shapes your whole workspace."}</p>
         </div>
 
@@ -35,15 +35,15 @@ export default function Onboarding() {
               ["professor", Presentation, "I'm a professor", "Run courses, publish assignments, review work and grade fairly."],
             ] as const).map(([r, Icon, t, b]) => (
               <button key={r} onClick={() => setRole(r)} data-testid={`button-role-${r}`}
-                className="group rounded-2xl border bg-card p-6 text-left transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-[0_20px_40px_-24px_hsl(214_65%_52%/0.6)]">
-                <div className="grid h-11 w-11 place-items-center rounded-xl bg-[hsl(var(--soft))] text-primary"><Icon className="h-5 w-5" /></div>
+                className="group border border-foreground/25 bg-card p-6 text-left transition-colors hover:border-foreground focus-visible:border-foreground">
+                <div className="text-primary"><Icon className="h-5 w-5" /></div>
                 <div className="mt-5 font-display text-lg font-bold">{t}</div>
                 <p className="mt-1 text-sm text-muted-foreground">{b}</p>
               </button>
             ))}
           </div>
         ) : (
-          <form className="rise mt-10 space-y-4 rounded-2xl border bg-card p-6"
+          <form className="rise mt-10 space-y-4 border-t-2 border-foreground bg-card p-6"
             onSubmit={async (e) => {
               e.preventDefault();
               const r = await run({ action: "onboard", role, ...f });

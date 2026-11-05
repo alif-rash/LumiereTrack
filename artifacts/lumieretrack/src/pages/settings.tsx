@@ -17,10 +17,10 @@ export default function Settings() {
       <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
         <Panel>
           <div className="flex flex-col items-center text-center">
-            {/^https?:\/\//.test(f.avatar) ? <img src={f.avatar} alt="" className="h-20 w-20 rounded-full object-cover ring-4 ring-[hsl(var(--soft))]" /> : <Initials name={f.name} className="h-20 w-20 text-xl" />}
+            {/^https?:\/\//.test(f.avatar) ? <img src={f.avatar} alt="" className="h-20 w-20 rounded-full object-cover border border-foreground/20" /> : <Initials name={f.name} className="h-20 w-20 text-xl" />}
             <div className="mt-4 font-display text-lg font-bold">{f.name}</div>
             <div className="text-sm text-muted-foreground">{p.email}</div>
-            <span className="mt-3 rounded-full bg-[hsl(var(--soft))] px-3 py-1 text-xs font-semibold capitalize text-primary">{p.role}</span>
+            <span className="mt-3 pill capitalize">{p.role}</span>
             <p className="mt-4 text-xs text-muted-foreground">Your role was set during onboarding and can't be changed here.</p>
           </div>
         </Panel>

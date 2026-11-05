@@ -24,14 +24,19 @@ export function buildReport(ws: Workspace, g: Rec) {
   }).join("");
   return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(g.title)} — LumiereTrack report</title>
 <style>
-body{font-family:"Plus Jakarta Sans",system-ui,sans-serif;color:#142B4A;margin:40px;font-size:12.5px;line-height:1.5}
-h1{font-size:26px;margin:0}h2{font-size:15px;margin:28px 0 8px;border-bottom:2px solid #EAF2FC;padding-bottom:6px}
-.meta{color:#5b6b82;margin-top:4px}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #e3eaf4;vertical-align:top}
-th{background:#F7F9FC;font-size:11px;text-transform:uppercase;letter-spacing:.05em}.tag{display:inline-block;padding:1px 8px;border-radius:99px;background:#EAF2FC;color:#3478D4;font-weight:600;font-size:11px}
-.foot{margin-top:36px;color:#8593a8;font-size:11px}@media print{body{margin:16mm}}
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap");
+body{font-family:"IBM Plex Sans",system-ui,sans-serif;color:#1A2420;background:#FAF7F0;margin:40px;font-size:12px;line-height:1.5}
+h1{font-family:Fraunces,Georgia,serif;font-weight:500;font-size:30px;letter-spacing:-.015em;margin:6px 0 0}
+h2{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:10.5px;text-transform:uppercase;letter-spacing:.14em;margin:30px 0 8px;border-bottom:1px solid #1A2420;padding-bottom:6px}
+.meta{color:#5A645F;margin-top:3px}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:7px 8px 7px 0;border-bottom:1px solid #D9D3C4;vertical-align:top}
+th{font-family:"IBM Plex Mono",monospace;font-weight:400;font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:#5A645F}
+td:nth-child(n+2){font-variant-numeric:tabular-nums}
+.tag{display:inline-block;padding:0 6px;border:1px solid #1B5448;color:#1B5448;font-family:"IBM Plex Mono",monospace;font-size:10px}
+.mast{display:flex;justify-content:space-between;border-bottom:2px solid #1A2420;padding-bottom:14px}
+.brand{font-family:Fraunces,Georgia,serif;font-size:15px}
+.foot{margin-top:36px;border-top:1px solid #D9D3C4;padding-top:8px;color:#5A645F;font-size:10.5px}@media print{body{margin:16mm;background:#fff}}
 </style></head><body>
-<div style="font-weight:800;letter-spacing:-.02em;color:#3478D4">LumiereTrack</div>
-<h1>${esc(g.title)}</h1>
+<div class="mast"><div><div class="brand">LumiereTrack</div><h1>${esc(g.title)}</h1></div><div class="meta" style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em">Contribution report</div></div>
 <div class="meta">${esc(course?.courseCode ?? "")} ${esc(course?.title ?? "")} · ${esc(assignment?.title ?? "")} · Due ${d(assignment?.dueDate)}</div>
 <div class="meta">Generated ${new Date().toLocaleString()} by ${esc(ws.profile.name)}</div>
 <h2>Members & contribution evidence</h2><table><tr><th>Member</th><th>Tasks owned</th><th>Approved</th><th>Submissions</th></tr>${rows || "<tr><td colspan=4>No members</td></tr>"}</table>

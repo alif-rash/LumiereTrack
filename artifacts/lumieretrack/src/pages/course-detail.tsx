@@ -2,9 +2,10 @@ import { Link, useParams } from "wouter";
 import { ArrowLeft, Copy, Pencil, Plus, UserPlus, FileText, Users, FolderKanban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PageHeader, Panel, Empty, Initials, Bar, fmtDate } from "@/components/kit";
-import { CourseDialog, AssignmentDialog, AddStudentDialog, GroupDialog } from "@/components/forms";
+import { PageHeader, Empty, Initials, Bar } from "@/components/kit";
+import { CourseDialog, AssignmentDialog, AddStudentDialog } from "@/components/forms";
 import { useWs, isProf, progressOf } from "@/lib/ws";
+import { AssignmentCard } from "@/pages/assignments";
 import { useToast } from "@/hooks/use-toast";
 
 export default function CourseDetail() {
@@ -36,27 +37,13 @@ export default function CourseDetail() {
 
         <TabsContent value="assignments" className="space-y-4">
           {canManage && <div className="flex justify-end"><AssignmentDialog courseId={course.id} trigger={<Button data-testid="button-new-assignment"><Plus className="mr-2 h-4 w-4" />New assignment</Button>} /></div>}
-          {assignments.length ? assignments.map((a) => (
-            <Panel key={a.id} title={a.title} action={canManage && <AssignmentDialog courseId={course.id} assignment={a} trigger={<Button size="sm" variant="ghost" data-testid={`button-edit-assignment-${a.id}`}><Pencil className="mr-1.5 h-3.5 w-3.5" />Edit</Button>} />}>
-              <div className="mb-4 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
-                <span>Opens {fmtDate(a.startDate)}</span><span className="font-semibold text-foreground">Due {fmtDate(a.dueDate)}</span>
-                <span>Groups of up to {a.groupSize}</span><span>{a.maxMarks} marks</span><span>{a.selfGroups ? "Students form groups" : "Professor assigns groups"}</span>
-              </div>
-              {a.description && <p className="text-sm">{a.description}</p>}
-              <div className="mt-4 grid gap-4 md:grid-cols-3">
-                {[["Instructions", a.instructions], ["Deliverables", a.deliverables], ["Rubric", a.rubric]].map(([k, v]) => v ? (
-                  <div key={k} className="rounded-xl bg-[hsl(var(--background))] p-3"><div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{k}</div><p className="mt-1.5 whitespace-pre-wrap text-[13px]">{v}</p></div>
-                ) : null)}
-              </div>
-              {(canManage || a.selfGroups) && <div className="mt-4"><GroupDialog assignmentId={a.id} trigger={<Button size="sm" variant="outline" data-testid={`button-create-group-${a.id}`}><Plus className="mr-1.5 h-3.5 w-3.5" />Create group</Button>} /></div>}
-            </Panel>
-          )) : <Empty icon={<FileText className="h-5 w-5" />} title="No assignments published" body={canManage ? "Publish a group assignment with a brief, rubric and due date." : "Your professor hasn't published an assignment yet."} />}
+          {assignments.length ? <div className="border-t border-foreground">{assignments.map((a, i) => <AssignmentCard key={a.id} a={a} i={i} />)}</div> : <Empty icon={<FileText className="h-5 w-5" />} title="No assignments published" body={canManage ? "Publish a group assignment with a brief, rubric and due date." : "Your professor hasn't published an assignment yet."} />}
         </TabsContent>
 
         <TabsContent value="students">
           {canManage && <div className="mb-4 flex justify-end"><AddStudentDialog courseId={course.id} trigger={<Button data-testid="button-add-student"><UserPlus className="mr-2 h-4 w-4" />Add student</Button>} /></div>}
           {students.length ? (
-            <div className="overflow-hidden rounded-2xl border bg-card">
+            <div className="border-y border-foreground bg-card">
               {students.map((s) => (
                 <div key={s.id} className="flex items-center gap-3 border-b px-4 py-3 last:border-0" data-testid={`row-student-${s.id}`}>
                   <Initials name={s.name} />
@@ -72,7 +59,7 @@ export default function CourseDetail() {
           {groups.length ? (
             <div className="grid gap-4 md:grid-cols-2">
               {groups.map((g) => (
-                <Link key={g.id} href={`/projects/${g.id}`} className="rounded-2xl border bg-card p-5 hover:border-primary/40" data-testid={`card-group-${g.id}`}>
+                <Link key={g.id} href={`/projects/${g.id}`} className="border border-border bg-card p-5 hover:border-foreground" data-testid={`card-group-${g.id}`}>
                   <div className="flex items-center justify-between"><span className="font-display font-bold">{g.title}</span><span className="font-mono-num text-xs text-muted-foreground">{progressOf(ws, g)}%</span></div>
                   <div className="mt-1 text-xs text-muted-foreground">{ws.assignments.find((a) => a.id === g.assignmentId)?.title}</div>
                   <Bar value={progressOf(ws, g)} className="mt-3" />

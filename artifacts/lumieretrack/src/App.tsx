@@ -46,6 +46,7 @@ if (!clerkPubKey) {
   throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY in .env file");
 }
 
+const INK = "#1A2420", PAPER = "#FAF7F0", GREEN = "#1B5448", MUTED = "#5A645F", RULE = "#D9D3C4";
 const clerkAppearance = {
   theme: shadcn,
   cssLayerName: "clerk",
@@ -54,41 +55,41 @@ const clerkAppearance = {
     socialButtonsVariant: "blockButton" as const,
   },
   variables: {
-    colorPrimary: "#3478D4",
-    colorForeground: "#142B4A",
-    colorMutedForeground: "#5B6B82",
-    colorDanger: "#D23F4C",
-    colorBackground: "#FFFFFF",
-    colorInput: "#F7F9FC",
-    colorInputForeground: "#142B4A",
-    colorNeutral: "#142B4A",
-    fontFamily: "'Plus Jakarta Sans', sans-serif",
-    borderRadius: "0.75rem",
+    colorPrimary: GREEN,
+    colorForeground: INK,
+    colorMutedForeground: MUTED,
+    colorDanger: "#B5402A",
+    colorBackground: PAPER,
+    colorInput: "#FFFDF8",
+    colorInputForeground: INK,
+    colorNeutral: INK,
+    fontFamily: "'IBM Plex Sans', system-ui, sans-serif",
+    borderRadius: "0.25rem",
   },
   elements: {
     rootBox: "w-full flex justify-center",
-    cardBox: "bg-white rounded-2xl w-[440px] max-w-full overflow-hidden border border-[#E1E9F4] shadow-[0_30px_60px_-30px_rgba(20,43,74,0.35)]",
+    cardBox: "bg-[#FAF7F0] rounded-[4px] w-[440px] max-w-full overflow-hidden border border-[#1A2420] shadow-none",
     card: "!shadow-none !border-0 !bg-transparent !rounded-none",
     footer: "!shadow-none !border-0 !bg-transparent !rounded-none",
-    headerTitle: "text-[#142B4A] font-extrabold text-2xl",
-    headerSubtitle: "text-[#5B6B82]",
-    socialButtonsBlockButtonText: "text-[#142B4A] font-semibold",
-    formFieldLabel: "text-[#142B4A] font-semibold",
-    footerActionLink: "text-[#3478D4] font-semibold",
-    footerActionText: "text-[#5B6B82]",
-    dividerText: "text-[#5B6B82]",
-    identityPreviewEditButton: "text-[#3478D4]",
-    formFieldSuccessText: "text-[#1F7A5C]",
-    alertText: "text-[#142B4A]",
+    headerTitle: "text-[#1A2420] font-semibold text-[26px] [font-family:Fraunces,Georgia,serif] tracking-tight",
+    headerSubtitle: "text-[#5A645F]",
+    socialButtonsBlockButtonText: "text-[#1A2420] font-medium",
+    formFieldLabel: "text-[#1A2420] font-semibold",
+    footerActionLink: "text-[#1B5448] font-semibold underline underline-offset-2",
+    footerActionText: "text-[#5A645F]",
+    dividerText: "text-[#5A645F] uppercase tracking-[0.14em] text-[10px] [font-family:'IBM_Plex_Mono',monospace]",
+    identityPreviewEditButton: "text-[#1B5448]",
+    formFieldSuccessText: "text-[#1B5448]",
+    alertText: "text-[#1A2420]",
     logoBox: "hidden",
     logoImage: "hidden",
-    socialButtonsBlockButton: "border border-[#DCE5F1] bg-white hover:bg-[#EAF2FC]",
-    formButtonPrimary: "bg-[#3478D4] text-white font-semibold",
-    formFieldInput: "bg-[#F7F9FC] border border-[#DCE5F1] text-[#142B4A]",
-    footerAction: "bg-[#F7F9FC]",
-    dividerLine: "bg-[#E1E9F4]",
-    alert: "bg-[#EAF2FC] border border-[#DCE5F1]",
-    otpCodeFieldInput: "border border-[#DCE5F1] text-[#142B4A]",
+    socialButtonsBlockButton: "border border-[#D9D3C4] bg-[#FFFDF8] hover:bg-[#F1ECDF] rounded-[3px]",
+    formButtonPrimary: "bg-[#1B5448] text-[#FAF7F0] font-semibold rounded-[3px] shadow-none",
+    formFieldInput: "bg-[#FFFDF8] border border-[#D9D3C4] text-[#1A2420] rounded-[3px]",
+    footerAction: "bg-[#F1ECDF] border-t border-[#D9D3C4]",
+    dividerLine: "bg-[#D9D3C4]",
+    alert: "bg-[#F5E6E1] border border-[#B5402A]/30 rounded-[3px]",
+    otpCodeFieldInput: "border border-[#D9D3C4] text-[#1A2420]",
     formFieldRow: "gap-3",
     main: "gap-5",
   },
@@ -96,16 +97,24 @@ const clerkAppearance = {
 
 function AuthLayout({ children, title, body }: { children: ReactNode; title: string; body: string }) {
   return (
-    <div className="grid min-h-[100dvh] lg:grid-cols-[1fr_1.1fr]">
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-[hsl(var(--navy))] p-12 text-white lg:flex">
+    <div className="grid min-h-[100dvh] bg-background lg:grid-cols-[1fr_1.1fr]">
+      <div className="relative hidden flex-col justify-between bg-foreground p-12 text-[hsl(42_38%_96%)] lg:flex">
         <Brand light />
         <div>
-          <h1 className="max-w-md text-[42px] font-extrabold leading-[1.05]">{title}</h1>
-          <p className="mt-4 max-w-sm text-white/70">{body}</p>
+          <div className="mb-5 font-mono text-[10.5px] uppercase tracking-[0.16em] text-[hsl(42_38%_96%/0.55)]">Evidence-first group work</div>
+          <h1 className="max-w-md text-[46px] font-medium leading-[1.02]">{title}</h1>
+          <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-[hsl(42_38%_96%/0.7)]">{body}</p>
         </div>
-        <div className="text-xs text-white/50">Responsibility · Evidence · Review · Grade</div>
+        <ol className="grid grid-cols-4 border-t border-[hsl(42_38%_96%/0.2)] pt-4 font-mono text-[10.5px] uppercase tracking-[0.12em] text-[hsl(42_38%_96%/0.6)]">
+          {["Responsibility", "Evidence", "Review", "Grade"].map((s, i) => <li key={s}><span className="text-[hsl(38_78%_60%)]">0{i + 1}</span><br />{s}</li>)}
+        </ol>
       </div>
-      <div className="grid-paper flex items-center justify-center bg-background px-4 py-10">{children}</div>
+      <div className="grid-paper flex items-center justify-center px-4 py-10">
+        <div className="w-full">
+          <div className="mb-8 flex justify-center lg:hidden"><Brand /></div>
+          {children}
+        </div>
+      </div>
     </div>
   );
 }
@@ -145,15 +154,17 @@ function ClerkQueryClientCacheInvalidator() {
 
 function LoadingShell() {
   return (
-    <div className="min-h-[100dvh] bg-background lg:pl-[256px]">
-      <div className="sidebar-navy fixed inset-y-0 left-0 hidden w-[256px] p-5 lg:block">
-        <SkeletonBlock className="h-8 w-36" />
-        <div className="mt-10 space-y-3">{Array.from({ length: 7 }).map((_, i) => <SkeletonBlock key={i} className="h-8" />)}</div>
+    <div className="min-h-[100dvh] bg-background lg:pl-[240px]" aria-busy="true" aria-label="Loading workspace">
+      <div className="sidebar-navy fixed inset-y-0 left-0 hidden w-[240px] border-r border-foreground/15 p-5 lg:block">
+        <SkeletonBlock className="h-7 w-36" />
+        <div className="mt-10 space-y-3">{Array.from({ length: 7 }).map((_, i) => <SkeletonBlock key={i} className="h-6" />)}</div>
       </div>
-      <div className="mx-auto max-w-[1240px] space-y-6 px-4 py-10 md:px-8">
-        <SkeletonBlock className="h-10 w-72" />
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">{Array.from({ length: 4 }).map((_, i) => <SkeletonBlock key={i} className="h-24" />)}</div>
-        <SkeletonBlock className="h-80" />
+      <div className="mx-auto max-w-[1200px] space-y-6 px-4 py-12 md:px-8">
+        <SkeletonBlock className="h-3 w-40" />
+        <SkeletonBlock className="h-10 w-80" />
+        <div className="h-px bg-foreground" />
+        <div className="grid grid-cols-2 gap-6 md:grid-cols-4">{Array.from({ length: 4 }).map((_, i) => <SkeletonBlock key={i} className="h-16" />)}</div>
+        <SkeletonBlock className="h-72" />
       </div>
     </div>
   );

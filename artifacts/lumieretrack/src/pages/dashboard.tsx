@@ -1,13 +1,13 @@
 import { Link } from "wouter";
-import { ArrowRight, BookOpen, ClipboardCheck, FolderKanban, ListChecks, ClipboardList, Crown, CalendarClock, Activity as ActivityIcon, MessageSquareText, Users, Award, Plus, KeyRound } from "lucide-react";
+import { ArrowRight, BookOpen, ClipboardList, KeyRound, Upload } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Panel, Stat, Empty, Pill, Bar, fmtDate, ago, isOverdue, Initials } from "@/components/kit";
-import { TaskCard } from "@/components/task-bits";
-import { JoinDialog, CourseDialog, ReviewDialog, GroupDialog } from "@/components/forms";
+import { StatusControl } from "@/components/task-bits";
+import { JoinDialog, CourseDialog, ReviewDialog, SubmitDialog } from "@/components/forms";
 import { GroupCard } from "@/pages/projects";
 import { AssignmentCard, useAssignmentBuckets } from "@/pages/assignments";
-import { useWs, isProf, progressOf, groupCtx, isLeader, toneOf, closingSoon, formationDeadline } from "@/lib/ws";
+import { useWs, isProf, progressOf, groupCtx, isLeader, formationDeadline, myGroupFor } from "@/lib/ws";
 import { cn } from "@/lib/utils";
 
 function greeting() {
@@ -15,18 +15,36 @@ function greeting() {
   return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
 }
 
+const more = (href: string, label: string, testId?: string) => (
+  <Link href={href} className="inline-flex items-center gap-1 text-xs font-semibold text-primary underline-offset-4 hover:underline" data-testid={testId}>{label}<ArrowRight className="h-3 w-3" /></Link>
+);
+
+function Masthead({ role, title, body, actions }: { role: string; title: string; body: ReactNode; actions?: ReactNode }) {
+  return (
+    <header className="rise mb-10 border-b border-foreground pb-6" data-testid="section-hero">
+      <div className="eyebrow mb-4">{role} · {fmtDate(new Date().toISOString(), "EEEE, d MMMM")}</div>
+      <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-[34px] leading-[1.02] md:text-[46px]">{title}</h1>
+          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-muted-foreground">{body}</p>
+        </div>
+        {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+      </div>
+    </header>
+  );
+}
+
 function Activity() {
   const ws = useWs();
   const items = [...ws.activity].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 8);
   return (
-    <Panel tone="sky" icon={<ActivityIcon className="h-4 w-4" />} title="Recent activity">
+    <Panel title="Recent activity">
       {items.length ? (
-        <ol className="relative space-y-4 border-l border-border pl-5">
+        <ol className="space-y-0">
           {items.map((a) => (
-            <li key={a.id} className="relative" data-testid={`row-activity-${a.id}`}>
-              <span className="absolute -left-[25px] top-1.5 h-2 w-2 rounded-full bg-primary ring-4 ring-card" />
-              <div className="text-[13px]"><span className="font-semibold">{a.userName}</span> {a.title}</div>
-              <div className="text-[11px] text-muted-foreground">{ago(a.createdAt)}</div>
+            <li key={a.id} className="grid grid-cols-[84px_1fr] gap-3 border-b border-border/70 py-2.5 last:border-0" data-testid={`row-activity-${a.id}`}>
+              <span className="font-mono text-[10.5px] leading-5 text-muted-foreground">{ago(a.createdAt).replace("about ", "")}</span>
+              <span className="text-[13px] leading-5"><span className="font-semibold">{a.userName}</span> {a.title}</span>
             </li>
           ))}
         </ol>
@@ -35,39 +53,29 @@ function Activity() {
   );
 }
 
-function Hero({ prof, eyebrow, title, body, actions }: { prof: boolean; eyebrow: string; title: string; body: string; actions?: ReactNode }) {
-  return (
-    <div className={cn("rise relative mb-6 overflow-hidden rounded-3xl px-6 py-7 text-white md:px-8 md:py-8", prof ? "hero-prof" : "hero-student")} data-testid="section-hero">
-      <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-        <div className="min-w-0">
-          <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">{eyebrow}</div>
-          <h1 className="text-[28px] font-extrabold leading-tight md:text-[34px]">{title}</h1>
-          <p className="mt-2 max-w-xl text-sm text-white/80">{body}</p>
-        </div>
-        {actions && <div className="flex flex-wrap gap-2 [&_button]:border-white/25">{actions}</div>}
-      </div>
-    </div>
-  );
-}
-
 function Deadlines() {
   const ws = useWs();
-  const items = ws.groups.map((g) => ({ g, a: groupCtx(ws, g).assignment })).filter((x) => x.a?.dueDate && new Date(x.a.dueDate).getTime() > Date.now() - 86400000)
-    .sort((x, y) => x.a!.dueDate!.localeCompare(y.a!.dueDate!)).slice(0, 5);
+  const now = Date.now() - 86400000;
+  const items = [
+    ...ws.groups.map((g) => ({ key: `d-${g.id}`, g, a: groupCtx(ws, g).assignment, date: groupCtx(ws, g).assignment?.dueDate, kind: "Submission" })),
+  ].filter((x) => x.date && new Date(x.date).getTime() > now).sort((x, y) => x.date!.localeCompare(y.date!)).slice(0, 6);
   return (
-    <Panel tone="coral" icon={<CalendarClock className="h-4 w-4" />} title="Upcoming group deadlines" testId="panel-deadlines">
+    <Panel title="Upcoming group deadlines" testId="panel-deadlines">
       {items.length ? (
-        <ul className="space-y-2.5">
-          {items.map(({ g, a }) => {
-            const d = new Date(a!.dueDate!);
-            const days = Math.ceil((d.getTime() - Date.now()) / 86400000);
+        <ul>
+          {items.map(({ key, g, a, date, kind }) => {
+            const days = Math.ceil((new Date(date!).getTime() - Date.now()) / 86400000);
             return (
-              <li key={g.id}>
-                <Link href={`/projects/${g.id}`} className="flex items-center gap-3 rounded-xl p-1.5 hover:bg-muted" data-testid={`link-deadline-${g.id}`}>
-                  <div className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-xl text-center leading-none", days <= 3 ? "bg-[#FF8177] text-white" : "bg-[#FFF0EE] text-[#c4544a]")}>
-                    <div><div className="text-[9px] font-bold uppercase">{fmtDate(a!.dueDate, "MMM")}</div><div className="font-mono-num text-base font-semibold">{fmtDate(a!.dueDate, "d")}</div></div>
+              <li key={key} className="border-b border-border/70 last:border-0">
+                <Link href={`/projects/${g.id}`} className="grid grid-cols-[52px_1fr] items-center gap-3 py-2.5 hover:bg-card" data-testid={`link-deadline-${g.id}`}>
+                  <div className={cn("border-l-2 pl-2 leading-none", days <= 3 ? "border-[hsl(var(--cinnabar))]" : "border-foreground/30")}>
+                    <div className="font-mono text-[9.5px] uppercase text-muted-foreground">{fmtDate(date, "MMM")}</div>
+                    <div className="font-mono-num mt-0.5 text-lg">{fmtDate(date, "d")}</div>
                   </div>
-                  <div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold">{a!.title}</div><div className="truncate text-[11px] text-muted-foreground">{g.title} · {days <= 0 ? "due today" : `${days} day${days === 1 ? "" : "s"} left`}</div></div>
+                  <div className="min-w-0">
+                    <div className="truncate text-[13px] font-semibold">{a?.title}</div>
+                    <div className={cn("truncate text-[11px]", days <= 3 ? "text-[hsl(var(--cinnabar))]" : "text-muted-foreground")}>{kind} · {g.title} · {days <= 0 ? "due today" : `${days} day${days === 1 ? "" : "s"} left`}</div>
+                  </div>
                 </Link>
               </li>
             );
@@ -78,44 +86,25 @@ function Deadlines() {
   );
 }
 
-function OpenAssignmentsPanel() {
-  const { open, soon } = useAssignmentBuckets();
-  return (
-    <Panel tone="teal" icon={<ClipboardList className="h-4 w-4" />} title="Open group assignments" testId="panel-open-assignments"
-      action={<Link href="/assignments" className="text-xs font-semibold text-primary" data-testid="link-all-assignments">Browse all{open.length ? ` (${open.length})` : ""}</Link>}>
-      {open.length ? (
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {open.slice(0, 3).map((a,i) => <AssignmentCard key={a.id} a={a} i={i} />)}
-        </div>
-      ) : (
-        <div className="flex flex-col items-start gap-2 rounded-xl border border-dashed bg-[#E8F8F5]/60 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
-          <span className="text-muted-foreground">No assignments are forming groups for you right now{soon.length ? "" : " — you're either grouped already or formation has closed"}.</span>
-          <Link href="/assignments" className="shrink-0 text-xs font-semibold text-primary">See assignments</Link>
-        </div>
-      )}
-    </Panel>
-  );
-}
-
-function ProjectsPanel() {
+function ProjectsList() {
   const ws = useWs();
   return (
-    <Panel tone="yellow" icon={<FolderKanban className="h-4 w-4" />} title={isProf(ws) ? "Projects" : "My active groups"} action={<Link href="/projects" className="text-xs font-semibold text-primary">View all</Link>}>
+    <Panel title={isProf(ws) ? "Group progress" : "My active groups"} action={more("/projects", "All projects")}>
       {ws.groups.length ? (
-        <div className="space-y-4">
-          {ws.groups.slice(0, 5).map((g) => {
+        <div>
+          {[...ws.groups].sort((a, b) => progressOf(ws, a) - progressOf(ws, b)).slice(0, 6).map((g) => {
             const { assignment } = groupCtx(ws, g);
             const p = progressOf(ws, g);
             return (
-              <Link key={g.id} href={`/projects/${g.id}`} className="block rounded-xl p-2 -m-2 hover:bg-muted" data-testid={`link-project-${g.id}`}>
-                <div className="flex items-center justify-between text-sm"><span className="font-semibold">{g.title}</span><span className="font-mono-num text-xs text-muted-foreground">{p}%</span></div>
-                <div className="mb-2 text-[11px] text-muted-foreground">{assignment?.title} · due {fmtDate(assignment?.dueDate, "MMM d")}</div>
+              <Link key={g.id} href={`/projects/${g.id}`} className="block border-b border-border/70 py-3 last:border-0 hover:bg-card" data-testid={`link-project-${g.id}`}>
+                <div className="flex items-baseline justify-between gap-3 text-sm"><span className="truncate font-semibold">{g.title}</span><span className="font-mono-num text-xs">{p}%</span></div>
+                <div className="mb-2 truncate text-[11px] text-muted-foreground">{assignment?.title} · due {fmtDate(assignment?.dueDate, "MMM d")}</div>
                 <Bar value={p} />
               </Link>
             );
           })}
         </div>
-      ) : <Empty icon={<FolderKanban className="h-5 w-5" />} title="No projects yet" body="Groups you belong to will show their progress here." />}
+      ) : <Empty title="No projects yet" body="Groups you belong to or supervise will show their approved progress here." />}
     </Panel>
   );
 }
@@ -128,49 +117,59 @@ export default function Dashboard() {
 
   if (prof) {
     const queue = ws.submissions.filter((s) => s.status === "Submitted" || s.status === "Under Review").sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    const changes = ws.submissions.filter((s) => s.status === "Changes Requested").length;
+    const ungraded = ws.groups.filter((g) => !ws.grades.some((x) => x.groupId === g.id)).length;
     return (
       <>
-        <Hero prof eyebrow={`Instructor · ${fmtDate(new Date().toISOString(), "EEEE, MMMM d")}`} title={`${greeting()}, ${first}.`} body={queue.length ? `${queue.length} submission${queue.length === 1 ? "" : "s"} are waiting for your judgement.` : "Your review queue is clear."}
-          actions={<CourseDialog trigger={<Button className="bg-[#F4C95D] text-[#172B4D] hover:bg-[#F4C95D]/90" data-testid="button-new-course"><BookOpen className="mr-2 h-4 w-4" />New course</Button>} />} />
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <Stat tone="lavender" icon={<BookOpen className="h-4 w-4" />} label="Courses" value={c.courses} />
-          <Stat tone="blue" icon={<FolderKanban className="h-4 w-4" />} label="Project groups" value={c.projects} />
-          <Stat tone="coral" icon={<ClipboardCheck className="h-4 w-4" />} label="Awaiting review" value={c.review} />
-          <Stat tone="teal" icon={<Award className="h-4 w-4" />} label="Tasks approved" value={`${c.completed}/${c.tasks}`} />
+        <Masthead role="Instructor" title={`${greeting()}, ${first}.`}
+          body={queue.length ? <><span className="font-semibold text-foreground">{queue.length} submission{queue.length === 1 ? "" : "s"}</span> {queue.length === 1 ? "is" : "are"} waiting for your judgement, oldest first below.</> : "Your review queue is clear."}
+          actions={<CourseDialog trigger={<Button data-testid="button-new-course"><BookOpen className="mr-2 h-4 w-4" />New course</Button>} />} />
+        <div className="grid grid-cols-2 gap-x-8 gap-y-6 md:grid-cols-4">
+          <Stat label="Awaiting review" value={c.review} sub="Submitted or under review" />
+          <Stat label="Changes requested" value={changes} sub="Returned to groups" />
+          <Stat label="Groups without a grade" value={ungraded} sub={`of ${c.projects} project groups`} />
+          <Stat label="Tasks approved" value={`${c.completed}/${c.tasks}`} sub={`across ${c.courses} course${c.courses === 1 ? "" : "s"}`} />
         </div>
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-          <Panel tone="coral" icon={<ClipboardCheck className="h-4 w-4" />} title="Review queue" action={<Link href="/reviews" className="text-xs font-semibold text-primary">Open queue</Link>}>
+        <div className="mt-12 grid gap-12 lg:grid-cols-[1.65fr_1fr]">
+          <Panel title="Review queue" action={more("/reviews", "Open full queue")}>
             {queue.length ? (
-              <div className="divide-y">
-                {queue.slice(0, 6).map((s) => {
-                  const g = ws.groups.find((x) => x.id === s.groupId);
-                  return (
-                    <div key={s.id} className="flex items-center gap-3 py-3">
-                      <Initials name={s.userName} />
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm font-semibold">{s.title} <span className="font-mono-num text-xs text-muted-foreground">v{s.version ?? 1}</span></div>
-                        <div className="truncate text-xs text-muted-foreground">{s.userName} · {g?.title} · {ago(s.createdAt)}</div>
-                      </div>
-                      <ReviewDialog submission={s} trigger={<Button size="sm" variant="outline" data-testid={`button-review-${s.id}`}>Review</Button>} />
-                    </div>
-                  );
-                })}
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[560px] text-left text-sm">
+                  <thead><tr className="eyebrow !text-[9.5px]"><th className="pb-2 font-normal">Submission</th><th className="pb-2 font-normal">Group</th><th className="pb-2 font-normal">Waiting</th><th className="pb-2" /></tr></thead>
+                  <tbody>
+                    {queue.slice(0, 8).map((s) => {
+                      const g = ws.groups.find((x) => x.id === s.groupId);
+                      return (
+                        <tr key={s.id} className="border-t border-border/70 align-middle">
+                          <td className="py-3 pr-3">
+                            <div className="flex items-center gap-2.5"><Initials name={s.userName} className="h-7 w-7" />
+                              <div className="min-w-0"><div className="truncate font-semibold">{s.title} <span className="font-mono-num text-[11px] font-normal text-muted-foreground">v{s.version ?? 1}</span></div><div className="truncate text-[11px] text-muted-foreground">{s.userName} · {s.taskId ? "task evidence" : "group deliverable"}</div></div>
+                            </div>
+                          </td>
+                          <td className="py-3 pr-3 text-[13px]">{g ? <Link href={`/projects/${g.id}`} className="hover:underline">{g.title}</Link> : "—"}</td>
+                          <td className="py-3 pr-3 font-mono text-[11px] text-muted-foreground">{ago(s.createdAt).replace(" ago", "")}</td>
+                          <td className="py-3 text-right"><ReviewDialog submission={s} trigger={<Button size="sm" variant="outline" data-testid={`button-review-${s.id}`}>Review</Button>} /></td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
-            ) : <Empty icon={<ClipboardCheck className="h-5 w-5" />} title="Nothing to review" body="New submissions from your groups will land here." />}
+            ) : <Empty title="Nothing to review" body="New submissions from your groups will land here, oldest first." />}
+          </Panel>
+          <ProjectsList />
+        </div>
+        <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_1.2fr]">
+          <Panel title="Your courses" action={more("/courses", "Manage courses")}>
+            {ws.courses.length ? ws.courses.slice(0, 6).map((co) => (
+              <Link key={co.id} href={`/courses/${co.id}`} className="grid grid-cols-[80px_1fr_auto] items-center gap-3 border-b border-border/70 py-3 last:border-0 hover:bg-card" data-testid={`link-course-${co.id}`}>
+                <span className="font-mono-num text-[12px]">{co.courseCode}</span>
+                <span className="truncate text-sm font-semibold">{co.title}</span>
+                <span className="font-mono text-[11px] text-muted-foreground">{co.memberIds?.length ?? 0} students</span>
+              </Link>
+            )) : <Empty title="No courses yet" body="Create your first course to generate an invite code." />}
           </Panel>
           <Activity />
-        </div>
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
-          <ProjectsPanel />
-          <Panel tone="lavender" icon={<BookOpen className="h-4 w-4" />} title="Your courses" action={<Link href="/courses" className="text-xs font-semibold text-primary">Manage</Link>}>
-            {ws.courses.length ? ws.courses.slice(0, 5).map((co) => (
-              <Link key={co.id} href={`/courses/${co.id}`} className={cn("flex items-center gap-3 rounded-xl px-2 py-2.5 hover:bg-muted", `tone-${toneOf(co.id)}`)} data-testid={`link-course-${co.id}`}>
-                <span className="t-bg h-9 w-1.5 rounded-full" />
-                <div className="flex-1"><div className="text-sm font-semibold">{co.title}</div><div className="font-mono-num text-[11px] text-muted-foreground">{co.courseCode} · {co.memberIds?.length ?? 0} students</div></div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
-              </Link>
-            )) : <Empty icon={<BookOpen className="h-5 w-5" />} title="No courses yet" body="Create your first course to generate an invite code." />}
-          </Panel>
         </div>
       </>
     );
@@ -183,38 +182,74 @@ export default function Dashboard() {
   const feedback = [...ws.reviews].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 4);
   return (
     <>
-      <Hero prof={false} eyebrow={`Student · ${fmtDate(new Date().toISOString(), "EEEE, MMMM d")}`} title={`${greeting()}, ${first}.`}
-        body={mine.length ? `You own ${mine.length} open task${mine.length === 1 ? "" : "s"}${overdue ? `, ${overdue} overdue` : ""}.` : "You have no open responsibilities right now."}
-        actions={<><JoinDialog kind="course" trigger={<Button variant="outline" className="bg-white/10 text-white hover:bg-white/20 hover:text-white" data-testid="button-join-course">Join course</Button>} /><JoinDialog kind="group" trigger={<Button variant="outline" className="bg-white/10 text-white hover:bg-white/20 hover:text-white" data-testid="button-join-group">Join group</Button>} /><Link href="/assignments" className="inline-flex h-9 items-center rounded-md bg-white px-4 text-sm font-semibold text-[#172B4D] hover:bg-white/90" data-testid="link-hero-assignments"><ClipboardList className="mr-2 h-4 w-4 text-[#3478D4]" />Open assignments</Link></>} />
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat tone="lavender" icon={<BookOpen className="h-4 w-4" />} label="Courses" value={c.courses} />
-        <Stat tone="blue" icon={<FolderKanban className="h-4 w-4" />} label="Projects" value={c.projects} />
-        <Stat tone="coral" icon={<ListChecks className="h-4 w-4" />} label="Pending tasks" value={c.pending} />
-        <Stat tone="teal" icon={<Award className="h-4 w-4" />} label="Approved" value={`${c.completed}/${c.tasks}`} />
+      <Masthead role="Student" title={`${greeting()}, ${first}.`}
+        body={mine.length ? <>You own <span className="font-semibold text-foreground">{mine.length} open task{mine.length === 1 ? "" : "s"}</span>{overdue ? <>, <span className="font-semibold text-[hsl(var(--cinnabar))]">{overdue} overdue</span></> : ""}. Start at the top of your docket.</> : "You have no open responsibilities right now."}
+        actions={<>
+          <JoinDialog kind="course" trigger={<Button variant="outline" data-testid="button-join-course">Join course</Button>} />
+          <JoinDialog kind="group" trigger={<Button variant="outline" data-testid="button-join-group"><KeyRound className="mr-2 h-4 w-4" />Join group</Button>} />
+          <Link href="/assignments" className="inline-flex min-h-9 items-center rounded-[3px] bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-foreground" data-testid="link-hero-assignments"><ClipboardList className="mr-2 h-4 w-4" />Open assignments</Link>
+        </>} />
+      <div className="grid grid-cols-2 gap-x-8 gap-y-6 md:grid-cols-4">
+        <Stat label="Open tasks" value={mine.length} sub={overdue ? `${overdue} overdue` : "none overdue"} />
+        <Stat label="Pending in groups" value={c.pending} sub="tasks not yet approved" />
+        <Stat label="Approved" value={`${c.completed}/${c.tasks}`} sub="tasks across your groups" />
+        <Stat label="Projects" value={c.projects} sub={`in ${c.courses} course${c.courses === 1 ? "" : "s"}`} />
       </div>
-      <div className="mt-6"><OpenAssignmentsPanel /></div>
+
+      <div className="mt-12 grid gap-12 lg:grid-cols-[1.65fr_1fr]">
+        <Panel title="My docket" action={more("/tasks", "All my tasks")}>
+          {mine.length ? (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[520px] text-left text-sm">
+                <thead><tr className="eyebrow !text-[9.5px]"><th className="pb-2 font-normal">Task</th><th className="pb-2 font-normal">Due</th><th className="pb-2 font-normal">Status</th><th className="pb-2" /></tr></thead>
+                <tbody>
+                  {mine.slice(0, 8).map((t) => {
+                    const g = ws.groups.find((x) => x.id === t.groupId);
+                    const over = isOverdue(t.dueDate, t.status);
+                    const canSubmit = ["To Do", "In Progress", "Changes Requested", undefined].includes(t.status);
+                    return (
+                      <tr key={t.id} className="border-t border-border/70" data-testid={`card-task-${t.id}`}>
+                        <td className="py-3 pr-3">
+                          <div className="flex items-center gap-2">
+                            <span aria-label={`${t.priority ?? "No"} priority`} className={cn("h-2 w-2 shrink-0", t.priority === "High" ? "bg-[hsl(var(--cinnabar))]" : t.priority === "Medium" ? "bg-[hsl(var(--ochre))]" : "bg-foreground/25")} />
+                            <span className="font-semibold">{t.title}</span>
+                          </div>
+                          {g && <Link href={`/projects/${g.id}`} className="ml-4 text-[11px] text-muted-foreground hover:text-foreground hover:underline">{g.title}</Link>}
+                        </td>
+                        <td className={cn("py-3 pr-3 font-mono text-[12px]", over ? "font-semibold text-[hsl(var(--cinnabar))]" : "text-muted-foreground")}>{t.dueDate ? fmtDate(t.dueDate, "MMM d") : "—"}{over && " · late"}</td>
+                        <td className="py-3 pr-3"><StatusControl task={t} /></td>
+                        <td className="py-3 text-right">{canSubmit && t.groupId && <SubmitDialog groupId={t.groupId} task={t} trigger={<Button size="sm" variant="ghost" className="text-primary" data-testid={`button-submit-task-${t.id}`}><Upload className="mr-1 h-3.5 w-3.5" />Evidence</Button>} />}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : <Empty title="Nothing assigned to you" body="Open a project and document a responsibility you are taking on." action={more("/projects", "Go to projects")} />}
+        </Panel>
+        <Deadlines />
+      </div>
+
+      <div className="mt-12"><OpenAssignments /></div>
+
       {led.length > 0 && (
-        <section className="mt-6" data-testid="section-groups-i-lead">
-          <h2 className="mb-3 flex items-center gap-2 text-[15px] font-bold"><span className="grid h-7 w-7 place-items-center rounded-lg bg-[#F2EEFF] text-[#8B7CF6]"><Crown className="h-4 w-4" /></span>Groups I lead</h2>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{led.slice(0, 3).map((g, i) => <GroupCard key={g.id} g={g} i={i} />)}</div>
+        <section className="mt-12" data-testid="section-groups-i-lead">
+          <Panel title="Groups I lead" action={more("/projects", "All projects")}>
+            <div className="-mt-4">{led.slice(0, 4).map((g, i) => <GroupCard key={g.id} g={g} i={i} />)}</div>
+          </Panel>
         </section>
       )}
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-        <Panel tone="blue" icon={<ListChecks className="h-4 w-4" />} title="Tasks assigned to me" action={<Link href="/tasks" className="text-xs font-semibold text-primary">All my tasks</Link>}>
-          {mine.length ? <div className="grid gap-3 md:grid-cols-2">{mine.slice(0, 6).map((t) => <TaskCard key={t.id} task={t} showProject />)}</div>
-            : <Empty icon={<ListChecks className="h-5 w-5" />} title="Nothing assigned to you" body="Open a project and document a responsibility you're taking on." action={<Link href="/projects" className="text-sm font-semibold text-primary">Go to projects</Link>} />}
-        </Panel>
-        <div className="space-y-6"><Deadlines /><ProjectsPanel /></div>
-      </div>
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <Panel tone="lavender" icon={<MessageSquareText className="h-4 w-4" />} title="Latest feedback">
+
+      <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_1fr_1fr]">
+        <ProjectsList />
+        <Panel title="Latest feedback">
           {feedback.length ? (
-            <div className="space-y-3">
+            <div>
               {feedback.map((r) => (
-                <div key={r.id} className="rounded-xl border p-3">
-                  <div className="flex items-center justify-between gap-2"><span className="text-sm font-semibold">{r.title}</span><Pill s={r.status} /></div>
-                  {r.feedback && <p className="mt-1.5 line-clamp-3 text-xs text-muted-foreground">{r.feedback}</p>}
-                  <div className="mt-2 text-[11px] text-muted-foreground">{r.userName ?? r.professorName} · {ago(r.createdAt)}</div>
+                <div key={r.id} className="border-b border-border/70 py-3 last:border-0">
+                  <div className="flex items-start justify-between gap-2"><span className="text-sm font-semibold">{r.title}</span><Pill s={r.status} /></div>
+                  {r.feedback && <p className="mt-1.5 line-clamp-3 border-l-2 border-foreground/20 pl-3 font-display text-[14px] italic leading-snug text-foreground/80">{r.feedback}</p>}
+                  <div className="mt-2 font-mono text-[10.5px] text-muted-foreground">{r.userName ?? r.professorName} · {ago(r.createdAt)}</div>
                 </div>
               ))}
             </div>
@@ -223,5 +258,21 @@ export default function Dashboard() {
         <Activity />
       </div>
     </>
+  );
+}
+
+function OpenAssignments() {
+  const ws = useWs();
+  const { open } = useAssignmentBuckets();
+  const notMine = open.filter((a) => !myGroupFor(ws, a.id));
+  const list = notMine.length ? notMine : open;
+  return (
+    <Panel title="Assignments forming groups" testId="panel-open-assignments" action={more("/assignments", `Browse all${open.length ? ` (${open.length})` : ""}`, "link-all-assignments")}>
+      {list.length ? (
+        <div className="-mt-4">{[...list].sort((a, b) => (formationDeadline(a) ?? "9").localeCompare(formationDeadline(b) ?? "9")).slice(0, 3).map((a, i) => <AssignmentCard key={a.id} a={a} i={i} />)}</div>
+      ) : (
+        <p className="text-sm text-muted-foreground">No assignments are forming groups for you right now — you are grouped already, or formation has closed. {more("/assignments", "See assignments")}</p>
+      )}
+    </Panel>
   );
 }

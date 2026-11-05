@@ -11,6 +11,12 @@ University group-project collaboration, documented contributions, professor revi
 - No hardcoded academic statistics, fake uploads or decorative nonfunctional controls.
 - Improve the existing application incrementally; preserve existing academic data and professor workflows.
 
+## Visual direction
+- Treat LumiereTrack as a distinctive academic workspace, not a generic dashboard template.
+- The former blue-and-white palette is not a requirement. Use the current shared design foundations consistently across every screen, including auth, reports, and empty states.
+- Prefer strong hierarchy and useful lists, tables, and workspaces over repeated floating cards. Avoid decorative gradients, glassmorphism, excessive rounding, and unnecessary shadows.
+- Visual redesigns must preserve all real actions, private grades, evidence histories, and role-specific workflows; do not replace behavior with mockups or invented academic data.
+
 ## Architecture
 - React/Vite frontend: `artifacts/lumieretrack`, served at `/`.
 - Express API: `artifacts/api-server`, served at `/api`.

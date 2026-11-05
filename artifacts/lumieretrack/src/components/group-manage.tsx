@@ -18,7 +18,7 @@ export function Capacity({ g, compact }: { g: Rec; compact?: boolean }) {
     <div data-testid={`capacity-${g.id}`}>
       <div className="flex items-center gap-1">
         {Array.from({ length: Math.max(size, count) }).map((_, i) => (
-          <span key={i} className={`h-2 flex-1 rounded-full transition-colors ${i < count ? "bg-[#28B8A6]" : "bg-[hsl(var(--soft))]"}`} />
+          <span key={i} className={`h-2 flex-1 rounded-[2px] transition-colors ${i < count ? "bg-primary" : "bg-[hsl(var(--soft))]"}`} />
         ))}
       </div>
       {!compact && <div className="mt-1.5 flex justify-between text-[11px] text-muted-foreground"><span className="font-mono-num">{count}/{size || "?"} members</span><span>{g.remainingSlots ?? Math.max(0, size - count)} slot{(g.remainingSlots ?? size - count) === 1 ? "" : "s"} left{g.minGroupSize ? ` · min ${g.minGroupSize}` : ""}</span></div>}
@@ -73,7 +73,7 @@ export function GroupManage({ g }: { g: Rec }) {
                 {isL && <Pill s="Leader" />}
                 {canRemove && !isL && m !== ws.profile.id && (
                   <AlertDialog>
-                    <AlertDialogTrigger asChild><Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" disabled={pending} data-testid={`button-remove-member-${m}`}><UserMinus className="h-4 w-4" /></Button></AlertDialogTrigger>
+                    <AlertDialogTrigger asChild><Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" disabled={pending} aria-label={`Remove ${nameOf(ws, m)}`} data-testid={`button-remove-member-${m}`}><UserMinus className="h-4 w-4" /></Button></AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>Remove {nameOf(ws, m)}?</AlertDialogTitle>
@@ -96,7 +96,7 @@ export function GroupManage({ g }: { g: Rec }) {
         {leader && !formationOpen && <Note>Formation is closed. Ask your professor if membership needs to change.</Note>}
         {canRemove && <div className="mt-3"><Note>Leaders can't be removed, nor can members with recorded work.</Note></div>}
         {prof && (
-          <div className="mt-5 rounded-xl border bg-[hsl(var(--soft)/0.5)] p-3">
+          <div className="mt-5 border-t border-border pt-4">
             <div className="mb-2 text-xs font-semibold">Add an enrolled student</div>
             {addable.length && !full ? (
               <div className="flex gap-2">
@@ -114,15 +114,15 @@ export function GroupManage({ g }: { g: Rec }) {
       <Panel tone="teal" title="Invitation code" icon={<KeyRound className="h-4 w-4" />} testId="panel-group-invite">
         {g.code && g.inviteActive !== false ? (
           <>
-            <div className="t-soft rounded-xl px-4 py-5 text-center">
-              <div className="font-mono-num text-3xl font-semibold tracking-[0.3em] t-fg" data-testid="text-group-code">{g.code}</div>
+            <div className="border-2 border-foreground bg-card px-4 py-6 text-center">
+              <div className="font-mono-num text-3xl font-semibold tracking-[0.3em] text-foreground" data-testid="text-group-code">{g.code}</div>
               <div className="mt-1 text-[11px] text-muted-foreground">{g.inviteExpiresAt ? `Expires ${fmtDate(g.inviteExpiresAt, "MMM d, h:mm a")}` : "Active until revoked"}</div>
             </div>
             <Button className="mt-3 w-full" onClick={copy} disabled={!inviteUsable} data-testid="button-copy-invite"><Copy className="mr-2 h-4 w-4" />Copy invitation code</Button>
             {expired && <p className="mt-2 text-xs text-destructive">This code has expired. The leader or professor can regenerate it while formation is open.</p>}
           </>
         ) : (
-          <div className="rounded-xl border border-dashed px-4 py-6 text-center text-sm text-muted-foreground" data-testid="text-no-invite">No active invitation code.</div>
+          <div className="border border-dashed px-4 py-6 text-center text-sm text-muted-foreground" data-testid="text-no-invite">No active invitation code.</div>
         )}
         {canCodes ? (
           <div className="mt-3 grid grid-cols-2 gap-2">

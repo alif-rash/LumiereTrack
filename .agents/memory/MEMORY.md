@@ -1,2 +1,3 @@
 - [OpenAPI schema naming](openapi-schema-naming.md) — avoid a schema named Record as a direct endpoint response; it can shadow TypeScript's built-in generic during codegen.
 - [Academic identity continuity](academic-identity.md) — keep academic ownership stable across sign-in identity changes; recovery requires a provider-verified primary email.
+- [Approved product direction](approved-product-direction.md) — the user approved the main app's academic-ledger redesign; preserve this direction in future feature work.

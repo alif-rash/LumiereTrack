@@ -31,7 +31,7 @@ function Modal({ trigger, title, description, submitLabel, pending, open, setOpe
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-display text-xl">{title}</DialogTitle>
+          <DialogTitle className="font-display text-2xl font-medium">{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         <form
@@ -56,10 +56,10 @@ const day = (s?: string) => (s ? s.slice(0, 10) : "");
 
 function FilePick({ file, setFile }: { file: File | null; setFile: (f: File | null) => void }) {
   return (
-    <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed bg-[hsl(var(--soft)/0.5)] px-4 py-3 text-sm hover:bg-accent">
-      <Paperclip className="h-4 w-4 text-primary" />
-      <span className="truncate">{file ? `${file.name} · ${(file.size / 1024).toFixed(0)} KB` : "Attach a file (max 20 MB)"}</span>
-      <input type="file" className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} data-testid="input-file" />
+    <label className="relative flex cursor-pointer items-center gap-3 border border-dashed border-foreground/30 bg-card px-4 py-3 text-sm hover:border-foreground focus-within:border-foreground focus-within:ring-2 focus-within:ring-ring">
+      <Paperclip className="pointer-events-none h-4 w-4 shrink-0 text-primary" />
+      <span className="pointer-events-none truncate">{file ? `${file.name} · ${(file.size / 1024).toFixed(0)} KB` : "Attach a file (max 20 MB)"}</span>
+      <input type="file" aria-label="Attach evidence file" className="absolute inset-0 h-full w-full cursor-pointer opacity-0" onChange={(e) => setFile(e.target.files?.[0] ?? null)} data-testid="input-file" />
     </label>
   );
 }
@@ -122,7 +122,7 @@ function GroupJoinDialog({ trigger, expectedAssignmentId }: { trigger: ReactElem
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-display text-xl">Join an existing group</DialogTitle>
+          <DialogTitle className="font-display text-2xl font-medium">Join an existing group</DialogTitle>
           <DialogDescription>Check the invitation code first. You'll see the group and assignment before anything changes.</DialogDescription>
         </DialogHeader>
         <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); if (preview) void confirm(); else check(); }}>
@@ -140,9 +140,9 @@ function GroupJoinDialog({ trigger, expectedAssignmentId }: { trigger: ReactElem
             </div>
           )}
           {preview && (
-            <div className="tone-teal overflow-hidden rounded-xl border t-border" data-testid="card-invitation-preview">
-              <div className="t-soft px-4 py-3">
-                <div className="font-mono-num text-[11px] t-fg">{preview.courseCode} · {preview.courseName}</div>
+            <div className="border-2 border-foreground" data-testid="card-invitation-preview">
+              <div className="border-b border-foreground bg-secondary px-4 py-3">
+                <div className="font-mono-num text-[11px] text-muted-foreground">{preview.courseCode} · {preview.courseName}</div>
                 <div className="font-display text-lg font-bold" data-testid="text-preview-group">{preview.title}</div>
                 <div className="text-xs text-muted-foreground" data-testid="text-preview-assignment">{preview.assignmentTitle}</div>
               </div>
@@ -183,7 +183,7 @@ export function AddStudentDialog({ trigger, courseId }: { trigger: ReactElement;
 
 function SwitchRow({ title, body, checked, onChange, testId, disabled }: { title: string; body: string; checked: boolean; onChange: (v: boolean) => void; testId: string; disabled?: boolean }) {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl border bg-[hsl(var(--soft)/0.5)] px-4 py-3">
+    <div className="flex items-center justify-between gap-4 border-b border-border px-1 py-3">
       <div><div className="text-sm font-semibold">{title}</div><div className="text-xs text-muted-foreground">{body}</div></div>
       <Switch checked={checked} disabled={disabled} onCheckedChange={onChange} data-testid={testId} />
     </div>
@@ -224,7 +224,7 @@ export function AssignmentDialog({ trigger, courseId, assignment }: { trigger: R
         <Field label="Max group size"><Input type="number" min={2} max={30} value={f.groupSize} onChange={set("groupSize")} data-testid="input-assignment-size" /></Field>
         <Field label="Max marks"><Input type="number" min={1} value={f.maxMarks} onChange={set("maxMarks")} data-testid="input-assignment-marks" /></Field>
       </div>
-      <div className="rounded-2xl border p-3">
+      <div className="border-t border-foreground pt-3">
         <div className="mb-3 px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Group formation</div>
         <div className="grid grid-cols-2 gap-3 px-1 pb-3">
           <Field label="Formation status">
@@ -371,7 +371,7 @@ export function SubmitDialog({ trigger, groupId, task }: { trigger: ReactElement
         if (r) { setOpen(false); setDesc(""); setLink(""); setFile(null); }
       }}>
       <Field label="What are you submitting?"><Textarea rows={4} value={description} onChange={(e) => setDesc(e.target.value)} placeholder="Summarise what changed and what a reviewer should look at." data-testid="input-submission-description" /></Field>
-      <Field label="Web link" hint="A link or a file is required."><Input value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://github.com/…" data-testid="input-submission-link" /></Field>
+      <Field label="Web link" hint={file ? "File attached. A web link is optional." : link.trim() ? "Web link provided. You may also attach a file." : "Provide a web link or attach a file below."}><Input value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://github.com/…" data-testid="input-submission-link" /></Field>
       <FilePick file={file} setFile={setFile} />
     </Modal>
   );

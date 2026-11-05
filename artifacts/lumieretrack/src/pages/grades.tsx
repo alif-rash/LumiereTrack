@@ -20,8 +20,8 @@ export default function Grades() {
       <PageHeader eyebrow="Grades" title={prof ? "Grades you've awarded" : "Your grades"} description={`${prof ? "Award group marks and individual marks separately." : "Group marks and any individual marks awarded to you."} Showing the latest grade per group and student${revisions > 0 ? ` (${revisions} earlier revision${revisions === 1 ? "" : "s"} kept in history)` : ""}.`}
         actions={prof && ws.groups.length > 0 && <GradeDialog trigger={<Button data-testid="button-award-grade"><Award className="mr-2 h-4 w-4" />Award grade</Button>} />} />
       {list.length ? (
-        <div className="overflow-hidden rounded-2xl border bg-card">
-          <div className="hidden grid-cols-[2fr_1fr_1fr_3fr] gap-4 border-b bg-[hsl(var(--background))] px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground md:grid"><span>Project</span><span>Scope</span><span>Marks</span><span>Feedback</span></div>
+        <div className="overflow-hidden border-y border-foreground bg-card">
+          <div className="hidden grid-cols-[2fr_1fr_1fr_3fr] gap-4 border-b border-foreground px-5 py-3 eyebrow md:grid"><span>Project</span><span>Scope</span><span>Marks</span><span>Feedback</span></div>
           {list.map((x) => {
             const g = ws.groups.find((y) => y.id === x.groupId);
             const { assignment } = groupCtx(ws, g);
