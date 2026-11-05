@@ -10,11 +10,17 @@ import { useWs, isProf } from "@/lib/ws";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
-export function Brand({ light }: { light?: boolean }) {
+export function Brand({ light, previewLogo = false }: { light?: boolean; previewLogo?: boolean }) {
   return (
     <div className="flex items-center gap-2.5">
-      {/* Reserved logo space — intentionally empty until the official mark is supplied */}
-      <span aria-hidden className={cn("h-7 w-7 border border-dashed", light ? "border-white/30" : "border-foreground/30")} />
+      {/* Trial mark is opt-in; official branding stays unchanged until approval. */}
+      {previewLogo ? (
+        <svg role="img" aria-label="Proposed LumiereTrack logo" viewBox="350 220 674 500" className="h-9 w-12 shrink-0 mix-blend-multiply">
+          <image href={`${basePath}/logo-preview.png`} width="1024" height="1024" />
+        </svg>
+      ) : (
+        <span aria-hidden className={cn("h-7 w-7 border border-dashed", light ? "border-white/30" : "border-foreground/30")} />
+      )}
       <span className={cn("font-display text-[19px] font-semibold tracking-tight", light ? "text-[hsl(42_38%_97%)]" : "text-foreground")}>LumiereTrack</span>
     </div>
   );

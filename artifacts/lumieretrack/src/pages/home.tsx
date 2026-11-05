@@ -46,7 +46,7 @@ export default function Home() {
     <div className="paper-noise min-h-[100dvh] bg-background text-foreground">
       <header className="sticky top-0 z-30 border-b border-foreground/15 bg-background/95">
         <div className="mx-auto flex max-w-[1200px] items-center justify-between px-5 py-4">
-          <Brand />
+          <Brand previewLogo />
           <nav aria-label="Sections" className="hidden gap-8 text-[13px] text-muted-foreground md:flex">
             <a href="#problem" className="hover:text-foreground">The problem</a>
             <a href="#how" className="hover:text-foreground">How it works</a>
