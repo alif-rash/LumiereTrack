@@ -15,9 +15,13 @@ export function Brand({ light, previewLogo = false }: { light?: boolean; preview
     <div className="flex items-center gap-2.5">
       {/* Trial mark is opt-in; official branding stays unchanged until approval. */}
       {previewLogo ? (
-        <svg role="img" aria-label="Proposed LumiereTrack logo" viewBox="350 220 674 500" className="h-9 w-12 shrink-0 mix-blend-multiply">
-          <image href={`${basePath}/logo-preview.png`} width="1024" height="1024" />
-        </svg>
+        <img
+          src={`${basePath}/logo-preview-polished.svg`}
+          alt="Refined LumiereTrack logo preview"
+          width="44"
+          height="36"
+          className="h-9 w-11 shrink-0 object-contain mix-blend-multiply"
+        />
       ) : (
         <span aria-hidden className={cn("h-7 w-7 border border-dashed", light ? "border-white/30" : "border-foreground/30")} />
       )}
