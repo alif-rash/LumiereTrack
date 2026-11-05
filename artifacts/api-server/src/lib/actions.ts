@@ -1,10 +1,11 @@
 import { pool } from "@workspace/db";
 import { activity, courseAccess, fail, groupAccess, uid, type Row, type Query } from "./lumiere";
+import { groupAction, validateFormation } from "./group-formation";
 
 const clean = (s: unknown) => typeof s === "string" ? s.trim() : "";
 function required(s: unknown, field: string) { const value=clean(s); if(!value) fail(`${field} is required.`); return value; }
 const only = (input: Row, fields: string[]) => Object.fromEntries(fields.filter(f=>input[f]!==undefined).map(f=>[f,input[f]]));
-const assignmentFields=['description','instructions','deliverables','rubric','selfGroups','groupSize','maxMarks','dueDate','startDate'];
+const assignmentFields=['description','instructions','deliverables','rubric','selfGroups','groupSize','maxMarks','dueDate','startDate','formationStatus','groupFormationDeadline','allowJoin','allowMemberManagement','minGroupSize'];
 function validDates(d: Row) {
   for(const f of ['dueDate','startDate']) if(d[f] && !Number.isFinite(Date.parse(d[f]))) fail(`Invalid ${f}.`);
   if(d.startDate && d.dueDate && Date.parse(d.startDate)>Date.parse(d.dueDate)) fail("Start date must precede the deadline.");
@@ -63,52 +64,29 @@ export async function perform(user: Row, d: Row) {
         case 'createAssignment': {
           await courseAccess(q,required(d.courseId,'Course'),user,true);
           required(d.dueDate,'Submission deadline');
+          validateFormation(d);
           id=uid();
           await q("INSERT INTO lt_assignments(id,course_id,title,data) VALUES($1,$2,$3,$4)",
             [id,d.courseId,required(d.title,'Assignment title'),{groupSize:4,maxMarks:100,selfGroups:true,...only(d,assignmentFields)}]); break;
         }
         case 'editAssignment': {
-          const a=(await q("SELECT * FROM lt_assignments WHERE id=$1",[required(d.id,'Assignment')])).rows[0];
+          const a=(await q("SELECT * FROM lt_assignments WHERE id=$1 FOR UPDATE",[required(d.id,'Assignment')])).rows[0];
           if(!a) fail("Assignment not found.",404);
           await courseAccess(q,a.course_id,user,true);
           const merged={...a.data,...only(d,assignmentFields)}; validDates(merged);
+          validateFormation(merged);
           const largest=(await q(`SELECT count(*)::int AS n FROM lt_group_members gm JOIN lt_groups g ON g.id=gm.group_id
             WHERE g.assignment_id=$1 GROUP BY gm.group_id ORDER BY n DESC LIMIT 1`,[a.id])).rows[0]?.n||0;
           if(merged.groupSize<largest) fail("Group size cannot be smaller than an existing group.");
           await q("UPDATE lt_assignments SET title=COALESCE($2,title),data=$3 WHERE id=$1",[a.id,d.title||null,merged]); break;
         }
-        case 'createGroup': {
-          const a=(await q("SELECT * FROM lt_assignments WHERE id=$1 FOR UPDATE",[required(d.assignmentId,'Assignment')])).rows[0];
-          if(!a) fail("Assignment not found.",404);
-          const access=await courseAccess(q,a.course_id,user);
-          if(!access.instructor && !a.data.selfGroups) fail("Your professor manages groups for this assignment.",403);
-          const members=[...new Set<string>([...(d.memberIds||[]),...(access.instructor?[]:[user.id])])];
-          if(members.length>(a.data.groupSize||4)) fail("Group size limit exceeded.");
-          for(const member of members) {
-            const m=(await q("SELECT u.role FROM lt_course_members cm JOIN lt_users u ON u.id=cm.user_id WHERE cm.course_id=$1 AND cm.user_id=$2 AND NOT cm.instructor",[a.course_id,member])).rows[0];
-            if(!m || m.role!=='student') fail("All group members must be enrolled students.");
-            const other=(await q("SELECT 1 FROM lt_group_members gm JOIN lt_groups g ON g.id=gm.group_id WHERE g.assignment_id=$1 AND gm.user_id=$2",[a.id,member])).rows[0];
-            if(other) fail("A student can only join one group per assignment.");
-          }
-          id=uid();
-          await q("INSERT INTO lt_groups(id,assignment_id,title,code) VALUES($1,$2,$3,$4)",[id,a.id,required(d.title,'Group name'),uid().replace(/-/g,'').slice(0,10).toUpperCase()]);
-          for(const member of members) await q("INSERT INTO lt_group_members(group_id,user_id) VALUES($1,$2)",[id,member]);
-          await activity(q,id,user,"Created the group"); break;
-        }
-        case 'joinGroup': {
-          if(user.role!=='student') fail("Only students join groups.",403);
-          const g=(await q("SELECT * FROM lt_groups WHERE code=$1 FOR UPDATE",[required(d.code,'Group invitation code').toUpperCase()])).rows[0];
-          if(!g) fail("Group invitation code not found.",404);
-          const a=(await q("SELECT * FROM lt_assignments WHERE id=$1 FOR UPDATE",[g.assignment_id])).rows[0]!;
-          await courseAccess(q,a.course_id,user);
-          if(!a.data.selfGroups) fail("Your professor assigns group members.",403);
-          const existing=(await q("SELECT gm.group_id FROM lt_group_members gm JOIN lt_groups g ON g.id=gm.group_id WHERE g.assignment_id=$1 AND gm.user_id=$2",[a.id,user.id])).rows[0];
-          if(existing) fail("You already belong to a group for this assignment.");
-          const count=(await q("SELECT count(*)::int AS n FROM lt_group_members WHERE group_id=$1",[g.id])).rows[0]!.n;
-          if(count>=(a.data.groupSize||4)) fail("This group is full.");
-          await q("INSERT INTO lt_group_members(group_id,user_id) VALUES($1,$2)",[g.id,user.id]);
-          await activity(q,g.id,user,"Joined the group"); id=g.id; break;
-        }
+        case 'createGroup':
+        case 'joinGroup':
+        case 'regenerateGroupCode':
+        case 'revokeGroupCode':
+        case 'removeGroupMember':
+        case 'addGroupMember':
+          id=await groupAction(q,user,d);break;
         case 'createTask':
         case 'editTask':
         case 'updateTaskStatus': {

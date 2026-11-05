@@ -2,6 +2,7 @@ import { pool } from "@workspace/db";
 import { clerkClient, getAuth } from "@clerk/express";
 import type { Request } from "express";
 import { randomUUID } from "node:crypto";
+import { formationRules } from "./group-formation";
 
 export const uid = () => randomUUID();
 export type Row = { [key: string]: any };
@@ -53,7 +54,7 @@ export async function activity(q: Query, groupId: string, user: Row, title: stri
     await q("INSERT INTO lt_notifications(id,user_id,title,data) VALUES($1,$2,$3,$4)",
       [uid(), r.user_id, `${user.name}: ${title}`, { groupId, ...data }]);
 }
-const record = (r: Row): Row => ({
+const record = (r: Row): Row & {id:string;title:string;createdAt:string} => ({
   ...r.data, id:r.id, title:r.title || r.data?.title || "", createdAt:new Date(r.created_at).toISOString(),
   ...(r.course_id && {courseId:r.course_id}), ...(r.assignment_id && {assignmentId:r.assignment_id}),
   ...(r.group_id && {groupId:r.group_id}), ...(r.task_id && {taskId:r.task_id}),
@@ -104,13 +105,26 @@ export async function workspace(user: Row) {
   }
   const notifications=(await query("SELECT * FROM lt_notifications WHERE user_id=$1 ORDER BY created_at DESC LIMIT 200",[user.id])).rows;
   const ownTasks=user.role==='professor'?tasks:tasks.filter(t=>t.assignee_id===user.id);
+  const decoratedAssignments=assignments.map(a=>{
+    const course=courses.find(c=>c.id===a.course_id)!;
+    const rules=formationRules(a.data);
+    const formed=groups.some(g=>g.assignment_id===a.id && g.member_ids.includes(user.id));
+    return {...record(a),...rules,courseName:course.title,courseCode:course.data.courseCode||"",professorName:course.professor_name,
+      canCreateGroup:user.role==='student' && !formed && rules.groupFormationOpen && rules.selfGroups,
+      canJoinGroup:user.role==='student' && !formed && rules.groupFormationOpen && rules.allowJoin};
+  });
   return {
     profile:profile(user,true),people:people.map(p=>profile(p)),
     courses:courses.map(c=>({...record(c),courseCode:c.data.courseCode||"",professorName:c.professor_name,memberIds:c.member_ids,instructorIds:c.instructor_ids})),
-    assignments:assignments.map(a=>({...record(a),courseName:courses.find(c=>c.id===a.course_id)?.title})),
+    assignments:decoratedAssignments,
+    openAssignments:decoratedAssignments.filter(a=>a.canCreateGroup||a.canJoinGroup),
     groups:groups.map(g=>{
       const ts=tasks.filter(t=>t.group_id===g.id), a=assignments.find(a=>a.id===g.assignment_id)!;
-      return {...record(g),description:a.data.description||"",dueDate:a.data.dueDate,courseName:courses.find(c=>c.id===a.course_id)?.title,
+      const rules=formationRules(a.data);
+      return {...record(g),...rules,leaderId:g.leader_id||"",leaderName:people.find(p=>p.id===g.leader_id)?.name||"",
+        memberCount:g.member_ids.length,remainingSlots:Math.max(0,rules.groupSize-g.member_ids.length),
+        inviteActive:g.invite_active,inviteExpiresAt:g.invite_expires_at?new Date(g.invite_expires_at).toISOString():"",
+        description:a.data.description||"",dueDate:a.data.dueDate,courseName:courses.find(c=>c.id===a.course_id)?.title,
         professorName:courses.find(c=>c.id===a.course_id)?.professor_name,memberIds:g.member_ids,memberNames:g.member_ids.map((id:string)=>people.find(p=>p.id===id)?.name||"Member"),
         progress:ts.length?Math.round(ts.filter(t=>t.status==='Approved').length/ts.length*100):0,status:ts.length&&ts.every(t=>t.status==='Approved')?'Completed':'In Progress'};
     }),

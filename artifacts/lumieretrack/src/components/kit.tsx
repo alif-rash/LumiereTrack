@@ -4,7 +4,7 @@ import { FileText, ExternalLink, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { fileHref } from "@/lib/ws";
+import { fileHref, type Tone } from "@/lib/ws";
 
 export function fmtDate(s?: string, f = "MMM d, yyyy") {
   if (!s) return "No date";
@@ -43,12 +43,13 @@ export function PageHeader({ eyebrow, title, description, actions }: { eyebrow?:
   );
 }
 
-export function Panel({ title, action, children, className }: { title?: ReactNode; action?: ReactNode; children: ReactNode; className?: string }) {
+export function Panel({ title, action, children, className, tone, icon, testId }: { title?: ReactNode; action?: ReactNode; children: ReactNode; className?: string; tone?: Tone; icon?: ReactNode; testId?: string }) {
   return (
-    <section className={cn("rounded-2xl border border-card-border bg-card p-5 shadow-[0_1px_2px_hsl(215_57%_18%/0.04)]", className)}>
+    <section className={cn("relative overflow-hidden rounded-2xl border border-card-border bg-card p-5 card-shadow", tone && `tone-${tone}`, className)} data-testid={testId}>
+      {tone && <span aria-hidden className="t-bg absolute inset-x-0 top-0 h-[3px] opacity-90" />}
       {(title || action) && (
         <div className="mb-4 flex items-center justify-between gap-3">
-          <h2 className="text-[15px] font-bold">{title}</h2>
+          <h2 className="flex items-center gap-2.5 text-[15px] font-bold">{icon && <span className={cn("grid h-7 w-7 place-items-center rounded-lg", tone ? "t-soft t-fg" : "bg-[hsl(var(--soft))] text-primary")}>{icon}</span>}{title}</h2>
           {action}
         </div>
       )}
@@ -119,18 +120,22 @@ export function Evidence({ link, objectPath, fileName }: { link?: string; object
   );
 }
 
-export function Bar({ value, className }: { value: number; className?: string }) {
+export function Bar({ value, className, tone }: { value: number; className?: string; tone?: Tone }) {
+  const auto: Tone = value >= 100 ? "teal" : value >= 60 ? "blue" : value >= 25 ? "lavender" : "coral";
   return (
-    <div className={cn("h-1.5 w-full overflow-hidden rounded-full bg-[hsl(var(--soft))]", className)}>
-      <div className="h-full origin-left rounded-full bg-primary transition-transform duration-700" style={{ transform: `scaleX(${Math.max(0, Math.min(100, value)) / 100})` }} />
+    <div className={cn("h-1.5 w-full overflow-hidden rounded-full bg-[hsl(var(--soft))]", `tone-${tone ?? auto}`, className)}>
+      <div className="t-bg h-full origin-left rounded-full transition-transform duration-700" style={{ transform: `scaleX(${Math.max(0, Math.min(100, value)) / 100})` }} />
     </div>
   );
 }
 
-export function Stat({ label, value, sub }: { label: string; value: ReactNode; sub?: string }) {
+export function Stat({ label, value, sub, tone, icon }: { label: string; value: ReactNode; sub?: string; tone?: Tone; icon?: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-card-border bg-card p-4">
-      <div className="text-xs font-medium text-muted-foreground">{label}</div>
+    <div className={cn("lift relative overflow-hidden rounded-2xl border border-card-border bg-card p-4 card-shadow", tone && `tone-${tone}`)} data-testid={`stat-${label.toLowerCase().replace(/\s/g, "-")}`}>
+      <div className="flex items-center justify-between gap-2">
+        <div className="text-xs font-medium text-muted-foreground">{label}</div>
+        {icon && <span className={cn("grid h-8 w-8 place-items-center rounded-xl", tone ? "t-soft t-fg" : "bg-[hsl(var(--soft))] text-primary")}>{icon}</span>}
+      </div>
       <div className="font-mono-num mt-1 text-2xl font-semibold text-foreground">{value}</div>
       {sub && <div className="mt-0.5 text-[11px] text-muted-foreground">{sub}</div>}
     </div>

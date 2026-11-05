@@ -52,7 +52,7 @@ export function useAct() {
       return null;
     }
   };
-  return { run, pending: m.isPending };
+  return { run, pending: m.isPending, error: m.error ? errMsg(m.error) : null, reset: m.reset };
 }
 
 export async function uploadFile(file: File, groupId: string) {
@@ -85,3 +85,21 @@ export function progressOf(ws: Workspace, g: Rec) {
   if (!t.length) return 0;
   return Math.round((t.filter((x) => x.status === "Approved").length / t.length) * 100);
 }
+
+export const TONES = ["blue", "lavender", "teal", "coral", "yellow", "sky"] as const;
+export type Tone = (typeof TONES)[number] | "navy";
+export function toneOf(id?: string): Tone {
+  let h = 0;
+  for (const c of id ?? "") h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return TONES[h % TONES.length];
+}
+export const myGroupFor = (ws: Workspace, assignmentId?: string) =>
+  ws.groups.find((g) => g.assignmentId === assignmentId && g.memberIds?.includes(ws.profile.id));
+export const formationDeadline = (a?: Rec) => a?.groupFormationDeadline || a?.dueDate;
+export function closingSoon(a?: Rec) {
+  const d = formationDeadline(a);
+  if (!d || a?.groupFormationOpen === false) return false;
+  const ms = new Date(d).getTime() - Date.now();
+  return ms >= -86400000 && ms <= 7 * 86400000;
+}
+export const isLeader = (ws: Workspace, g?: Rec) => !!g?.leaderId && g.leaderId === ws.profile.id;

@@ -4,9 +4,16 @@ import { currentUser, workspace, groupAccess, query, fail, type Row } from "../l
 import { perform } from "../lib/actions";
 import { ObjectStorageService } from "../lib/objectStorage";
 import OpenAI from "openai";
+import { invitationPreview } from "../lib/group-formation";
 
 const router: IRouter=Router();
 const storage=new ObjectStorageService();
+router.get("/group-invitations/:code",async(req,res):Promise<void>=>{
+  const user=await currentUser(req);
+  const code=String(req.params.code||"");
+  if(!/^[A-Za-z0-9]{6,40}$/.test(code)) fail("Enter a valid invitation code.");
+  res.json(await invitationPreview(query,code,user));
+});
 router.get("/workspace",async(req,res):Promise<void>=>{
   const user=await currentUser(req);
   res.json(GetWorkspaceResponse.parse(await workspace(user)));

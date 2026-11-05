@@ -5,6 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { ActionInputAction } from './actionInputAction';
+import type { ActionInputFormationStatus } from './actionInputFormationStatus';
 import type { ActionInputPriority } from './actionInputPriority';
 import type { ActionInputRole } from './actionInputRole';
 import type { ActionInputScope } from './actionInputScope';
@@ -40,6 +41,15 @@ export interface ActionInput {
   deliverables?: string;
   rubric?: string;
   selfGroups?: boolean;
+  formationStatus?: ActionInputFormationStatus;
+  groupFormationDeadline?: string;
+  allowJoin?: boolean;
+  allowMemberManagement?: boolean;
+  /**
+     * @minimum 1
+     * @maximum 30
+     */
+  minGroupSize?: number;
   /**
      * @minimum 2
      * @maximum 30

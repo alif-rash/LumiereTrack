@@ -4,6 +4,7 @@
  * Api
  * OpenAPI spec version: 1.0.0
  */
+import type { RecordFormationStatus } from './recordFormationStatus';
 
 export interface Record {
   id: string;
@@ -45,4 +46,19 @@ export interface Record {
   instructorIds?: string[];
   memberNames?: string[];
   progress?: number;
+  leaderId?: string;
+  leaderName?: string;
+  memberCount?: number;
+  remainingSlots?: number;
+  inviteActive?: boolean;
+  inviteExpiresAt?: string;
+  formationStatus?: RecordFormationStatus;
+  groupFormationDeadline?: string;
+  groupFormationOpen?: boolean;
+  allowJoin?: boolean;
+  allowMemberManagement?: boolean;
+  minGroupSize?: number;
+  canCreateGroup?: boolean;
+  canJoinGroup?: boolean;
+  assignmentTitle?: string;
 }

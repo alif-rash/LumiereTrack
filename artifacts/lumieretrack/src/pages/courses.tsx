@@ -3,7 +3,7 @@ import { BookOpen, Plus, Users, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader, Empty } from "@/components/kit";
 import { CourseDialog, JoinDialog } from "@/components/forms";
-import { useWs, isProf } from "@/lib/ws";
+import { useWs, isProf, toneOf } from "@/lib/ws";
 
 export default function Courses() {
   const ws = useWs();
@@ -19,9 +19,10 @@ export default function Courses() {
           {ws.courses.map((c, i) => {
             const assignments = ws.assignments.filter((a) => a.courseId === c.id).length;
             return (
-              <Link key={c.id} href={`/courses/${c.id}`} className="rise group flex flex-col rounded-2xl border border-card-border bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_20px_40px_-28px_hsl(215_57%_18%/0.4)]" style={{ animationDelay: `${i * 40}ms` }} data-testid={`card-course-${c.id}`}>
+              <Link key={c.id} href={`/courses/${c.id}`} className={`tone-${toneOf(c.id)} rise lift group relative flex flex-col overflow-hidden rounded-2xl border border-card-border bg-card p-5 card-shadow`} style={{ animationDelay: `${i * 40}ms` }} data-testid={`card-course-${c.id}`}>
+                <span aria-hidden className="t-bg absolute inset-x-0 top-0 h-1" />
                 <div className="flex items-start justify-between">
-                  <span className="font-mono-num rounded-md bg-[hsl(var(--soft))] px-2 py-0.5 text-xs font-medium text-primary">{c.courseCode}</span>
+                  <span className="t-soft t-fg font-mono-num rounded-md px-2 py-0.5 text-xs font-medium">{c.courseCode}</span>
                   {prof && c.code && <span className="font-mono-num text-[11px] text-muted-foreground">Invite {c.code}</span>}
                 </div>
                 <div className="mt-4 font-display text-lg font-bold leading-snug group-hover:text-primary">{c.title}</div>

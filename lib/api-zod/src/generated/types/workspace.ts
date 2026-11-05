@@ -13,6 +13,7 @@ export interface Workspace {
   people: Profile[];
   courses: Record[];
   assignments: Record[];
+  openAssignments: Record[];
   groups: Record[];
   tasks: Record[];
   submissions: Record[];

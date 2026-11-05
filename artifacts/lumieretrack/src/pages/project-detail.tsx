@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useParams } from "wouter";
 import { ArrowLeft, Copy, Plus, Upload, Printer, Award, MessageSquareText, Inbox, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader, Panel, Empty, Initials, Bar, Pill, Evidence, Stat, fmtDate, ago } from "@/components/kit";
 import { TaskDialog, SubmitDialog, ReviewDialog, GradeDialog } from "@/components/forms";
 import { TaskCard } from "@/components/task-bits";
-import { useWs, isProf, groupCtx, progressOf, nameOf, STATUSES, type Rec } from "@/lib/ws";
+import { GroupManage, Capacity } from "@/components/group-manage";
+import { useWs, isProf, isLeader, groupCtx, progressOf, nameOf, STATUSES, type Rec } from "@/lib/ws";
 import { exportReport } from "@/lib/report";
 import { useToast } from "@/hooks/use-toast";
 
@@ -44,6 +46,7 @@ export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const ws = useWs();
   const { toast } = useToast();
+  const [tab, setTab] = useState("tasks");
   const g = ws.groups.find((x) => x.id === id);
   if (!g) return <Empty title="Project not found" body="It may not exist, or you're not a member." action={<Link href="/projects" className="text-sm font-semibold text-primary">Back to projects</Link>} />;
   const prof = isProf(ws);
@@ -63,25 +66,26 @@ export default function ProjectDetail() {
   })();
   const p = progressOf(ws, g);
   const members = g.memberIds ?? [];
+  const lead = isLeader(ws, g);
 
   return (
     <>
       <Link href="/projects" className="mb-4 inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground"><ArrowLeft className="h-3.5 w-3.5" />Projects</Link>
       <PageHeader eyebrow={`${course?.courseCode ?? ""} · ${assignment?.title ?? ""}`} title={g.title} description={`Due ${fmtDate(assignment?.dueDate)} · ${members.length} member${members.length === 1 ? "" : "s"} · ${p}% approved`}
         actions={<>
-          {g.code && <Button variant="outline" className="font-mono-num" onClick={() => navigator.clipboard.writeText(g.code!).then(() => toast({ title: "Group code copied" }))} data-testid="button-copy-group-code"><Copy className="mr-2 h-4 w-4" />{g.code}</Button>}
+          {g.code && g.inviteActive !== false && (member || prof) && <Button variant="outline" className="font-mono-num" onClick={() => navigator.clipboard.writeText(g.code!).then(() => toast({ title: "Invitation code copied" }), () => toast({ title: "Couldn't copy", description: g.code, variant: "destructive" }))} data-testid="button-copy-group-code"><Copy className="mr-2 h-4 w-4" />{g.code}</Button>}
           {member && <SubmitDialog groupId={g.id} trigger={<Button data-testid="button-submit-group"><Upload className="mr-2 h-4 w-4" />Submit deliverable</Button>} />}
           {prof && <GradeDialog groupId={g.id} trigger={<Button data-testid="button-grade"><Award className="mr-2 h-4 w-4" />Award grade</Button>} />}
         </>} />
-      <Tabs defaultValue="tasks">
+      <Tabs value={tab} onValueChange={setTab}>
         <div className="-mx-4 mb-6 overflow-x-auto px-4">
           <TabsList>
-            {["Overview", "Tasks", "Timeline", "Contributions", "Submissions", "Feedback", "Reports"].map((t) => <TabsTrigger key={t} value={t.toLowerCase()} data-testid={`tab-${t.toLowerCase()}`}>{t}</TabsTrigger>)}
+            {["Overview", "Members", "Tasks", "Timeline", "Contributions", "Submissions", "Feedback", "Reports"].map((t) => <TabsTrigger key={t} value={t.toLowerCase()} data-testid={`tab-${t.toLowerCase()}`}>{t}</TabsTrigger>)}
           </TabsList>
         </div>
 
         <TabsContent value="overview" className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-          <Panel title="Assignment brief">
+          <Panel tone="blue" title="Assignment brief">
             {assignment?.description && <p className="text-sm">{assignment.description}</p>}
             <div className="mt-4 space-y-4">
               {[["Instructions", assignment?.instructions], ["Deliverables", assignment?.deliverables], ["Rubric", assignment?.rubric]].map(([k, v]) => v ? (
@@ -91,13 +95,16 @@ export default function ProjectDetail() {
             </div>
           </Panel>
           <div className="space-y-6">
-            <Panel title="Progress"><div className="font-mono-num text-3xl font-semibold">{p}%</div><Bar value={p} className="mt-3" /><div className="mt-2 text-xs text-muted-foreground">{tasks.filter((t) => t.status === "Approved").length} of {tasks.length} tasks approved · {assignment?.maxMarks ?? "—"} marks available</div></Panel>
-            <Panel title="Members">
-              <div className="space-y-3">{members.map((m) => <div key={m} className="flex items-center gap-3"><Initials name={nameOf(ws, m)} /><div className="text-sm font-medium">{nameOf(ws, m)}{m === ws.profile.id && <span className="text-muted-foreground"> (you)</span>}</div></div>)}</div>
+            <Panel tone="teal" title="Progress"><div className="font-mono-num text-3xl font-semibold">{p}%</div><Bar value={p} className="mt-3" /><div className="mt-2 text-xs text-muted-foreground">{tasks.filter((t) => t.status === "Approved").length} of {tasks.length} tasks approved · {assignment?.maxMarks ?? "—"} marks available</div></Panel>
+            <Panel tone="lavender" title="Members" action={<button onClick={() => setTab("members")} className="text-xs font-semibold text-primary" data-testid="button-open-members">{lead || prof ? "Manage" : "View all"}</button>}>
+              <Capacity g={g} />
+              <div className="mt-4 space-y-3">{members.map((m) => <div key={m} className="flex items-center gap-3"><Initials name={nameOf(ws, m)} /><div className="flex-1 text-sm font-medium">{nameOf(ws, m)}{m === ws.profile.id && <span className="text-muted-foreground"> (you)</span>}</div>{m === g.leaderId && <Pill s="Leader" />}</div>)}</div>
               {!members.length && <p className="text-sm text-muted-foreground">No members yet. Share the group code.</p>}
             </Panel>
           </div>
         </TabsContent>
+
+        <TabsContent value="members"><GroupManage g={g} /></TabsContent>
 
         <TabsContent value="tasks">
           {(member || prof) && <div className="mb-4 flex justify-end"><TaskDialog groupId={g.id} trigger={<Button data-testid="button-new-task"><Plus className="mr-2 h-4 w-4" />Add task</Button>} /></div>}

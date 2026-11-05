@@ -80,10 +80,10 @@
   --elevate-1: rgba(0, 0, 0, 0.03);
   --elevate-2: rgba(0, 0, 0, 0.08);
 
-  --background: 216 45% 98%;
-  --foreground: 215 57% 18%;
+  --background: 222 60% 97.5%;
+  --foreground: 217 54% 20%;
   --border: 214 32% 89%;
-  --card: 0 0% 100%;
+  --card: 220 60% 99.6%;
   --card-foreground: 215 57% 18%;
   --card-border: 214 32% 90%;
   --sidebar: 0 0% 100%;
@@ -110,12 +110,12 @@
   --input: 214 30% 86%;
   --ring: 214 65% 52%;
   --chart-1: 214 65% 52%;
-  --chart-2: 215 57% 18%;
-  --chart-3: 168 52% 38%;
-  --chart-4: 36 86% 52%;
-  --chart-5: 352 62% 54%;
-  --navy: 215 57% 18%;
-  --soft: 214 76% 95%;
+  --chart-2: 249 88% 73%;
+  --chart-3: 172 64% 44%;
+  --chart-4: 42 87% 66%;
+  --chart-5: 5 100% 73%;
+  --navy: 217 54% 20%;
+  --soft: 222 100% 97%;
 
   --app-font-sans: 'Plus Jakarta Sans', 'Inter', sans-serif;
   --app-font-display: 'Manrope', sans-serif;
@@ -205,10 +205,10 @@
   --elevate-1: rgba(255, 255, 255, 0.04);
   --elevate-2: rgba(255, 255, 255, 0.09);
 
-  --background: 216 45% 98%;
-  --foreground: 215 57% 18%;
+  --background: 222 60% 97.5%;
+  --foreground: 217 54% 20%;
   --border: 214 32% 89%;
-  --card: 0 0% 100%;
+  --card: 220 60% 99.6%;
   --card-foreground: 215 57% 18%;
   --card-border: 214 32% 90%;
   --sidebar: 0 0% 100%;
@@ -235,12 +235,12 @@
   --input: 214 30% 86%;
   --ring: 214 65% 52%;
   --chart-1: 214 65% 52%;
-  --chart-2: 215 57% 18%;
-  --chart-3: 168 52% 38%;
-  --chart-4: 36 86% 52%;
-  --chart-5: 352 62% 54%;
-  --navy: 215 57% 18%;
-  --soft: 214 76% 95%;
+  --chart-2: 249 88% 73%;
+  --chart-3: 172 64% 44%;
+  --chart-4: 42 87% 66%;
+  --chart-5: 5 100% 73%;
+  --navy: 217 54% 20%;
+  --soft: 222 100% 97%;
 
   --shadow-2xs: 0px 2px 0px 0px hsl(215 57% 18% / 0.06);
   --shadow-xs: 0px 2px 0px 0px hsl(215 57% 18% / 0.06);
@@ -405,3 +405,25 @@
 @keyframes rise { from { opacity:0; transform: translateY(8px);} to { opacity:1; transform:none; } }
 .cl-formFieldInput::placeholder { color: hsl(215 18% 55%); opacity: 1; }
 .cl-formButtonPrimary:hover { background: hsl(215 57% 18%) !important; }
+
+/* Accent tone system */
+.tone-blue{--t:214 65% 52%;--ts:222 100% 97%;--tf:214 70% 36%}
+.tone-sky{--t:216 100% 67%;--ts:216 100% 96%;--tf:216 70% 40%}
+.tone-lavender{--t:249 88% 72%;--ts:254 100% 97%;--tf:252 50% 44%}
+.tone-teal{--t:172 64% 44%;--ts:168 55% 94%;--tf:172 70% 25%}
+.tone-coral{--t:5 100% 73%;--ts:5 100% 96%;--tf:5 60% 44%}
+.tone-yellow{--t:42 87% 64%;--ts:44 90% 93%;--tf:35 72% 30%}
+.tone-navy{--t:217 54% 20%;--ts:222 60% 95%;--tf:217 54% 20%}
+.t-bg{background:hsl(var(--t))}.t-soft{background:hsl(var(--ts))}.t-fg{color:hsl(var(--tf))}.t-border{border-color:hsl(var(--t)/.35)}
+.lift{transition:transform .2s cubic-bezier(.2,.7,.2,1),box-shadow .2s,border-color .2s}
+.lift:hover{transform:translateY(-2px);box-shadow:0 14px 30px -18px hsl(217 54% 20%/.35);border-color:hsl(var(--t,214 65% 52%)/.45)}
+.card-shadow{box-shadow:0 1px 2px hsl(217 54% 20%/.04),0 8px 24px -18px hsl(217 54% 20%/.18)}
+.hero-student{background:radial-gradient(120% 140% at 100% 0%,hsl(249 88% 72%/.28),transparent 55%),radial-gradient(90% 120% at 0% 100%,hsl(172 64% 44%/.18),transparent 60%),linear-gradient(135deg,#3478D4,#579BFF)}
+.hero-prof{background:radial-gradient(100% 140% at 100% 0%,hsl(42 87% 64%/.22),transparent 55%),radial-gradient(90% 120% at 0% 100%,hsl(214 65% 52%/.35),transparent 60%),#172B4D}
+.sidebar-navy{background:linear-gradient(180deg,#172B4D 0%,#1B3360 100%)}
+.pill[data-s="open"]{background:hsl(168 55% 93%);color:hsl(172 70% 25%)}
+.pill[data-s="closed"]{background:hsl(214 30% 93%);color:hsl(215 25% 38%)}
+.pill[data-s="Closing soon"]{background:hsl(44 90% 92%);color:hsl(35 72% 30%)}
+.pill[data-s="Leader"]{background:hsl(254 100% 96%);color:hsl(252 50% 44%)}
+.pill[data-s="Full"]{background:hsl(5 100% 95%);color:hsl(5 60% 44%)}
+@media (prefers-reduced-motion: reduce){.rise,.lift{animation:none;transition:none}}

@@ -1,0 +1,1 @@
+- [OpenAPI schema naming](openapi-schema-naming.md) — avoid a schema named Record as a direct endpoint response; it can shadow TypeScript's built-in generic during codegen.

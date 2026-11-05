@@ -29,6 +29,7 @@ import type {
   ChatAnswer,
   ChatInput,
   HealthStatus,
+  InvitationPreview,
   UploadInput,
   UploadResult,
   Workspace
@@ -332,6 +333,101 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getPerformActionMutationOptions(options), queryClient);
     }
+
+export const getPreviewGroupInvitationUrl = (code: string,) => {
+
+
+
+
+  return `/api/group-invitations/${code}`
+}
+
+export const previewGroupInvitation = async (code: string, options?: Parameters<typeof customFetch>[1]): Promise<InvitationPreview> => {
+
+  return customFetch<InvitationPreview>(getPreviewGroupInvitationUrl(code),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPreviewGroupInvitationQueryKey = (code: string,) => {
+    return [
+    `/api/group-invitations/${code}`
+    ] as const;
+    }
+
+
+export const getPreviewGroupInvitationQueryOptions = <TData = Awaited<ReturnType<typeof previewGroupInvitation>>, TError = ErrorType<unknown>>(code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof previewGroupInvitation>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPreviewGroupInvitationQueryKey(code);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof previewGroupInvitation>>> = ({ signal }) => previewGroupInvitation(code, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: code !== null && code !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof previewGroupInvitation>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type PreviewGroupInvitationQueryResult = NonNullable<Awaited<ReturnType<typeof previewGroupInvitation>>>
+export type PreviewGroupInvitationQueryError = ErrorType<unknown>
+
+
+export function usePreviewGroupInvitation<TData = Awaited<ReturnType<typeof previewGroupInvitation>>, TError = ErrorType<unknown>>(
+ code: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof previewGroupInvitation>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof previewGroupInvitation>>,
+          TError,
+          Awaited<ReturnType<typeof previewGroupInvitation>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePreviewGroupInvitation<TData = Awaited<ReturnType<typeof previewGroupInvitation>>, TError = ErrorType<unknown>>(
+ code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof previewGroupInvitation>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof previewGroupInvitation>>,
+          TError,
+          Awaited<ReturnType<typeof previewGroupInvitation>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePreviewGroupInvitation<TData = Awaited<ReturnType<typeof previewGroupInvitation>>, TError = ErrorType<unknown>>(
+ code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof previewGroupInvitation>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function usePreviewGroupInvitation<TData = Awaited<ReturnType<typeof previewGroupInvitation>>, TError = ErrorType<unknown>>(
+ code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof previewGroupInvitation>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getPreviewGroupInvitationQueryOptions(code,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getAskAssistantUrl = () => {
 

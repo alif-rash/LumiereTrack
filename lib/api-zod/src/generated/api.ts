@@ -76,7 +76,22 @@ export const GetWorkspaceResponse = zod.object({
   "memberIds": zod.array(zod.string()).optional(),
   "instructorIds": zod.array(zod.string()).optional(),
   "memberNames": zod.array(zod.string()).optional(),
-  "progress": zod.number().optional()
+  "progress": zod.number().optional(),
+  "leaderId": zod.string().optional(),
+  "leaderName": zod.string().optional(),
+  "memberCount": zod.number().int().optional(),
+  "remainingSlots": zod.number().int().optional(),
+  "inviteActive": zod.boolean().optional(),
+  "inviteExpiresAt": zod.string().optional(),
+  "formationStatus": zod.enum(['open', 'closed']).optional(),
+  "groupFormationDeadline": zod.string().optional(),
+  "groupFormationOpen": zod.boolean().optional(),
+  "allowJoin": zod.boolean().optional(),
+  "allowMemberManagement": zod.boolean().optional(),
+  "minGroupSize": zod.number().int().optional(),
+  "canCreateGroup": zod.boolean().optional(),
+  "canJoinGroup": zod.boolean().optional(),
+  "assignmentTitle": zod.string().optional()
 })),
   "assignments": zod.array(zod.object({
   "id": zod.string(),
@@ -117,7 +132,78 @@ export const GetWorkspaceResponse = zod.object({
   "memberIds": zod.array(zod.string()).optional(),
   "instructorIds": zod.array(zod.string()).optional(),
   "memberNames": zod.array(zod.string()).optional(),
-  "progress": zod.number().optional()
+  "progress": zod.number().optional(),
+  "leaderId": zod.string().optional(),
+  "leaderName": zod.string().optional(),
+  "memberCount": zod.number().int().optional(),
+  "remainingSlots": zod.number().int().optional(),
+  "inviteActive": zod.boolean().optional(),
+  "inviteExpiresAt": zod.string().optional(),
+  "formationStatus": zod.enum(['open', 'closed']).optional(),
+  "groupFormationDeadline": zod.string().optional(),
+  "groupFormationOpen": zod.boolean().optional(),
+  "allowJoin": zod.boolean().optional(),
+  "allowMemberManagement": zod.boolean().optional(),
+  "minGroupSize": zod.number().int().optional(),
+  "canCreateGroup": zod.boolean().optional(),
+  "canJoinGroup": zod.boolean().optional(),
+  "assignmentTitle": zod.string().optional()
+})),
+  "openAssignments": zod.array(zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "createdAt": zod.string(),
+  "description": zod.string().optional(),
+  "courseId": zod.string().optional(),
+  "courseCode": zod.string().optional(),
+  "courseName": zod.string().optional(),
+  "professorName": zod.string().optional(),
+  "assignmentId": zod.string().optional(),
+  "groupId": zod.string().optional(),
+  "taskId": zod.string().optional(),
+  "submissionId": zod.string().optional(),
+  "userId": zod.string().optional(),
+  "userName": zod.string().optional(),
+  "assigneeId": zod.string().optional(),
+  "createdBy": zod.string().optional(),
+  "status": zod.string().optional(),
+  "priority": zod.string().optional(),
+  "dueDate": zod.string().optional(),
+  "startDate": zod.string().optional(),
+  "code": zod.string().optional(),
+  "instructions": zod.string().optional(),
+  "deliverables": zod.string().optional(),
+  "rubric": zod.string().optional(),
+  "selfGroups": zod.boolean().optional(),
+  "groupSize": zod.number().int().optional(),
+  "maxMarks": zod.number().optional(),
+  "marks": zod.number().optional(),
+  "feedback": zod.string().optional(),
+  "version": zod.number().int().optional(),
+  "scope": zod.string().optional(),
+  "read": zod.boolean().optional(),
+  "link": zod.string().optional(),
+  "objectPath": zod.string().optional(),
+  "fileName": zod.string().optional(),
+  "memberIds": zod.array(zod.string()).optional(),
+  "instructorIds": zod.array(zod.string()).optional(),
+  "memberNames": zod.array(zod.string()).optional(),
+  "progress": zod.number().optional(),
+  "leaderId": zod.string().optional(),
+  "leaderName": zod.string().optional(),
+  "memberCount": zod.number().int().optional(),
+  "remainingSlots": zod.number().int().optional(),
+  "inviteActive": zod.boolean().optional(),
+  "inviteExpiresAt": zod.string().optional(),
+  "formationStatus": zod.enum(['open', 'closed']).optional(),
+  "groupFormationDeadline": zod.string().optional(),
+  "groupFormationOpen": zod.boolean().optional(),
+  "allowJoin": zod.boolean().optional(),
+  "allowMemberManagement": zod.boolean().optional(),
+  "minGroupSize": zod.number().int().optional(),
+  "canCreateGroup": zod.boolean().optional(),
+  "canJoinGroup": zod.boolean().optional(),
+  "assignmentTitle": zod.string().optional()
 })),
   "groups": zod.array(zod.object({
   "id": zod.string(),
@@ -158,7 +244,22 @@ export const GetWorkspaceResponse = zod.object({
   "memberIds": zod.array(zod.string()).optional(),
   "instructorIds": zod.array(zod.string()).optional(),
   "memberNames": zod.array(zod.string()).optional(),
-  "progress": zod.number().optional()
+  "progress": zod.number().optional(),
+  "leaderId": zod.string().optional(),
+  "leaderName": zod.string().optional(),
+  "memberCount": zod.number().int().optional(),
+  "remainingSlots": zod.number().int().optional(),
+  "inviteActive": zod.boolean().optional(),
+  "inviteExpiresAt": zod.string().optional(),
+  "formationStatus": zod.enum(['open', 'closed']).optional(),
+  "groupFormationDeadline": zod.string().optional(),
+  "groupFormationOpen": zod.boolean().optional(),
+  "allowJoin": zod.boolean().optional(),
+  "allowMemberManagement": zod.boolean().optional(),
+  "minGroupSize": zod.number().int().optional(),
+  "canCreateGroup": zod.boolean().optional(),
+  "canJoinGroup": zod.boolean().optional(),
+  "assignmentTitle": zod.string().optional()
 })),
   "tasks": zod.array(zod.object({
   "id": zod.string(),
@@ -199,7 +300,22 @@ export const GetWorkspaceResponse = zod.object({
   "memberIds": zod.array(zod.string()).optional(),
   "instructorIds": zod.array(zod.string()).optional(),
   "memberNames": zod.array(zod.string()).optional(),
-  "progress": zod.number().optional()
+  "progress": zod.number().optional(),
+  "leaderId": zod.string().optional(),
+  "leaderName": zod.string().optional(),
+  "memberCount": zod.number().int().optional(),
+  "remainingSlots": zod.number().int().optional(),
+  "inviteActive": zod.boolean().optional(),
+  "inviteExpiresAt": zod.string().optional(),
+  "formationStatus": zod.enum(['open', 'closed']).optional(),
+  "groupFormationDeadline": zod.string().optional(),
+  "groupFormationOpen": zod.boolean().optional(),
+  "allowJoin": zod.boolean().optional(),
+  "allowMemberManagement": zod.boolean().optional(),
+  "minGroupSize": zod.number().int().optional(),
+  "canCreateGroup": zod.boolean().optional(),
+  "canJoinGroup": zod.boolean().optional(),
+  "assignmentTitle": zod.string().optional()
 })),
   "submissions": zod.array(zod.object({
   "id": zod.string(),
@@ -240,7 +356,22 @@ export const GetWorkspaceResponse = zod.object({
   "memberIds": zod.array(zod.string()).optional(),
   "instructorIds": zod.array(zod.string()).optional(),
   "memberNames": zod.array(zod.string()).optional(),
-  "progress": zod.number().optional()
+  "progress": zod.number().optional(),
+  "leaderId": zod.string().optional(),
+  "leaderName": zod.string().optional(),
+  "memberCount": zod.number().int().optional(),
+  "remainingSlots": zod.number().int().optional(),
+  "inviteActive": zod.boolean().optional(),
+  "inviteExpiresAt": zod.string().optional(),
+  "formationStatus": zod.enum(['open', 'closed']).optional(),
+  "groupFormationDeadline": zod.string().optional(),
+  "groupFormationOpen": zod.boolean().optional(),
+  "allowJoin": zod.boolean().optional(),
+  "allowMemberManagement": zod.boolean().optional(),
+  "minGroupSize": zod.number().int().optional(),
+  "canCreateGroup": zod.boolean().optional(),
+  "canJoinGroup": zod.boolean().optional(),
+  "assignmentTitle": zod.string().optional()
 })),
   "reviews": zod.array(zod.object({
   "id": zod.string(),
@@ -281,7 +412,22 @@ export const GetWorkspaceResponse = zod.object({
   "memberIds": zod.array(zod.string()).optional(),
   "instructorIds": zod.array(zod.string()).optional(),
   "memberNames": zod.array(zod.string()).optional(),
-  "progress": zod.number().optional()
+  "progress": zod.number().optional(),
+  "leaderId": zod.string().optional(),
+  "leaderName": zod.string().optional(),
+  "memberCount": zod.number().int().optional(),
+  "remainingSlots": zod.number().int().optional(),
+  "inviteActive": zod.boolean().optional(),
+  "inviteExpiresAt": zod.string().optional(),
+  "formationStatus": zod.enum(['open', 'closed']).optional(),
+  "groupFormationDeadline": zod.string().optional(),
+  "groupFormationOpen": zod.boolean().optional(),
+  "allowJoin": zod.boolean().optional(),
+  "allowMemberManagement": zod.boolean().optional(),
+  "minGroupSize": zod.number().int().optional(),
+  "canCreateGroup": zod.boolean().optional(),
+  "canJoinGroup": zod.boolean().optional(),
+  "assignmentTitle": zod.string().optional()
 })),
   "grades": zod.array(zod.object({
   "id": zod.string(),
@@ -322,7 +468,22 @@ export const GetWorkspaceResponse = zod.object({
   "memberIds": zod.array(zod.string()).optional(),
   "instructorIds": zod.array(zod.string()).optional(),
   "memberNames": zod.array(zod.string()).optional(),
-  "progress": zod.number().optional()
+  "progress": zod.number().optional(),
+  "leaderId": zod.string().optional(),
+  "leaderName": zod.string().optional(),
+  "memberCount": zod.number().int().optional(),
+  "remainingSlots": zod.number().int().optional(),
+  "inviteActive": zod.boolean().optional(),
+  "inviteExpiresAt": zod.string().optional(),
+  "formationStatus": zod.enum(['open', 'closed']).optional(),
+  "groupFormationDeadline": zod.string().optional(),
+  "groupFormationOpen": zod.boolean().optional(),
+  "allowJoin": zod.boolean().optional(),
+  "allowMemberManagement": zod.boolean().optional(),
+  "minGroupSize": zod.number().int().optional(),
+  "canCreateGroup": zod.boolean().optional(),
+  "canJoinGroup": zod.boolean().optional(),
+  "assignmentTitle": zod.string().optional()
 })),
   "activity": zod.array(zod.object({
   "id": zod.string(),
@@ -363,7 +524,22 @@ export const GetWorkspaceResponse = zod.object({
   "memberIds": zod.array(zod.string()).optional(),
   "instructorIds": zod.array(zod.string()).optional(),
   "memberNames": zod.array(zod.string()).optional(),
-  "progress": zod.number().optional()
+  "progress": zod.number().optional(),
+  "leaderId": zod.string().optional(),
+  "leaderName": zod.string().optional(),
+  "memberCount": zod.number().int().optional(),
+  "remainingSlots": zod.number().int().optional(),
+  "inviteActive": zod.boolean().optional(),
+  "inviteExpiresAt": zod.string().optional(),
+  "formationStatus": zod.enum(['open', 'closed']).optional(),
+  "groupFormationDeadline": zod.string().optional(),
+  "groupFormationOpen": zod.boolean().optional(),
+  "allowJoin": zod.boolean().optional(),
+  "allowMemberManagement": zod.boolean().optional(),
+  "minGroupSize": zod.number().int().optional(),
+  "canCreateGroup": zod.boolean().optional(),
+  "canJoinGroup": zod.boolean().optional(),
+  "assignmentTitle": zod.string().optional()
 })),
   "notifications": zod.array(zod.object({
   "id": zod.string(),
@@ -404,7 +580,22 @@ export const GetWorkspaceResponse = zod.object({
   "memberIds": zod.array(zod.string()).optional(),
   "instructorIds": zod.array(zod.string()).optional(),
   "memberNames": zod.array(zod.string()).optional(),
-  "progress": zod.number().optional()
+  "progress": zod.number().optional(),
+  "leaderId": zod.string().optional(),
+  "leaderName": zod.string().optional(),
+  "memberCount": zod.number().int().optional(),
+  "remainingSlots": zod.number().int().optional(),
+  "inviteActive": zod.boolean().optional(),
+  "inviteExpiresAt": zod.string().optional(),
+  "formationStatus": zod.enum(['open', 'closed']).optional(),
+  "groupFormationDeadline": zod.string().optional(),
+  "groupFormationOpen": zod.boolean().optional(),
+  "allowJoin": zod.boolean().optional(),
+  "allowMemberManagement": zod.boolean().optional(),
+  "minGroupSize": zod.number().int().optional(),
+  "canCreateGroup": zod.boolean().optional(),
+  "canJoinGroup": zod.boolean().optional(),
+  "assignmentTitle": zod.string().optional()
 })),
   "counts": zod.object({
   "courses": zod.number().int(),
@@ -417,6 +608,8 @@ export const GetWorkspaceResponse = zod.object({
 })
 
 
+export const performActionBodyMinGroupSizeMax = 30;
+
 export const performActionBodyGroupSizeMin = 2;
 export const performActionBodyGroupSizeMax = 30;
 
@@ -426,7 +619,7 @@ export const performActionBodyMarksMin = 0;
 
 
 export const PerformActionBody = zod.object({
-  "action": zod.enum(['onboard', 'updateProfile', 'createCourse', 'editCourse', 'joinCourse', 'addStudent', 'createAssignment', 'editAssignment', 'createGroup', 'joinGroup', 'createTask', 'editTask', 'updateTaskStatus', 'submit', 'review', 'grade', 'readNotification']),
+  "action": zod.enum(['onboard', 'updateProfile', 'createCourse', 'editCourse', 'joinCourse', 'addStudent', 'createAssignment', 'editAssignment', 'createGroup', 'joinGroup', 'regenerateGroupCode', 'revokeGroupCode', 'removeGroupMember', 'addGroupMember', 'createTask', 'editTask', 'updateTaskStatus', 'submit', 'review', 'grade', 'readNotification']),
   "id": zod.string().optional(),
   "title": zod.string().optional(),
   "description": zod.string().optional(),
@@ -456,6 +649,11 @@ export const PerformActionBody = zod.object({
   "deliverables": zod.string().optional(),
   "rubric": zod.string().optional(),
   "selfGroups": zod.boolean().optional(),
+  "formationStatus": zod.enum(['open', 'closed']).optional(),
+  "groupFormationDeadline": zod.string().optional(),
+  "allowJoin": zod.boolean().optional(),
+  "allowMemberManagement": zod.boolean().optional(),
+  "minGroupSize": zod.number().int().min(1).max(performActionBodyMinGroupSizeMax).optional(),
   "groupSize": zod.number().int().min(performActionBodyGroupSizeMin).max(performActionBodyGroupSizeMax).optional(),
   "maxMarks": zod.number().min(1).optional(),
   "marks": zod.number().min(performActionBodyMarksMin).optional(),
@@ -471,6 +669,24 @@ export const PerformActionResponse = zod.object({
   "success": zod.boolean(),
   "message": zod.string(),
   "id": zod.string().optional()
+})
+
+
+export const PreviewGroupInvitationParams = zod.object({
+  "code": zod.coerce.string()
+})
+
+export const PreviewGroupInvitationResponse = zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "assignmentId": zod.string(),
+  "assignmentTitle": zod.string(),
+  "courseName": zod.string(),
+  "courseCode": zod.string(),
+  "memberCount": zod.number().int(),
+  "groupSize": zod.number().int(),
+  "remainingSlots": zod.number().int(),
+  "inviteExpiresAt": zod.string().optional()
 })
 
 

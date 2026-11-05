@@ -4,6 +4,19 @@
  * Api
  * OpenAPI spec version: 1.0.0
  */
+export interface InvitationPreview {
+  id: string;
+  title: string;
+  assignmentId: string;
+  assignmentTitle: string;
+  courseName: string;
+  courseCode: string;
+  memberCount: number;
+  groupSize: number;
+  remainingSlots: number;
+  inviteExpiresAt?: string;
+}
+
 export interface HealthStatus {
   status: string;
 }
@@ -29,6 +42,14 @@ export interface Profile {
   studentId: string;
   avatar: string;
 }
+
+export type RecordFormationStatus = typeof RecordFormationStatus[keyof typeof RecordFormationStatus];
+
+
+export const RecordFormationStatus = {
+  open: 'open',
+  closed: 'closed',
+} as const;
 
 export interface Record {
   id: string;
@@ -70,6 +91,21 @@ export interface Record {
   instructorIds?: string[];
   memberNames?: string[];
   progress?: number;
+  leaderId?: string;
+  leaderName?: string;
+  memberCount?: number;
+  remainingSlots?: number;
+  inviteActive?: boolean;
+  inviteExpiresAt?: string;
+  formationStatus?: RecordFormationStatus;
+  groupFormationDeadline?: string;
+  groupFormationOpen?: boolean;
+  allowJoin?: boolean;
+  allowMemberManagement?: boolean;
+  minGroupSize?: number;
+  canCreateGroup?: boolean;
+  canJoinGroup?: boolean;
+  assignmentTitle?: string;
 }
 
 export interface Counts {
@@ -86,6 +122,7 @@ export interface Workspace {
   people: Profile[];
   courses: Record[];
   assignments: Record[];
+  openAssignments: Record[];
   groups: Record[];
   tasks: Record[];
   submissions: Record[];
@@ -110,6 +147,10 @@ export const ActionInputAction = {
   editAssignment: 'editAssignment',
   createGroup: 'createGroup',
   joinGroup: 'joinGroup',
+  regenerateGroupCode: 'regenerateGroupCode',
+  revokeGroupCode: 'revokeGroupCode',
+  removeGroupMember: 'removeGroupMember',
+  addGroupMember: 'addGroupMember',
   createTask: 'createTask',
   editTask: 'editTask',
   updateTaskStatus: 'updateTaskStatus',
@@ -134,6 +175,14 @@ export const ActionInputPriority = {
   Low: 'Low',
   Medium: 'Medium',
   High: 'High',
+} as const;
+
+export type ActionInputFormationStatus = typeof ActionInputFormationStatus[keyof typeof ActionInputFormationStatus];
+
+
+export const ActionInputFormationStatus = {
+  open: 'open',
+  closed: 'closed',
 } as const;
 
 export type ActionInputScope = typeof ActionInputScope[keyof typeof ActionInputScope];
@@ -175,6 +224,15 @@ export interface ActionInput {
   deliverables?: string;
   rubric?: string;
   selfGroups?: boolean;
+  formationStatus?: ActionInputFormationStatus;
+  groupFormationDeadline?: string;
+  allowJoin?: boolean;
+  allowMemberManagement?: boolean;
+  /**
+     * @minimum 1
+     * @maximum 30
+     */
+  minGroupSize?: number;
   /**
      * @minimum 2
      * @maximum 30

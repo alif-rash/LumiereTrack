@@ -9,6 +9,7 @@ University group-project collaboration, documented contributions, professor revi
 - Preserve submission, review and grading histories.
 - The user will supply the actual logo. Reserve space; do not generate a replacement logo.
 - No hardcoded academic statistics, fake uploads or decorative nonfunctional controls.
+- Improve the existing application incrementally; preserve existing academic data and professor workflows.
 
 ## Architecture
 - React/Vite frontend: `artifacts/lumieretrack`, served at `/`.
@@ -30,3 +31,11 @@ University group-project collaboration, documented contributions, professor revi
 - Professors create courses and share invitation codes. Students enroll using those codes.
 - Account onboarding establishes each user's role once; it does not grant access to anyone else's courses.
 - Notifications come from mutations and idempotent deadline checks during workspace polling.
+- Student group creators become leaders. Leaders may manage invitations and remove members only when professor rules permit; academic records block member removal.
+- Creation and code-based joining are independently controlled by each assignment. Formation deadlines include the whole date when no time is specified.
+- Group capacity and one membership per assignment are enforced transactionally with a database uniqueness constraint.
+- Old groups remain accessible after formation closes; only new student membership and invitations are restricted.
+
+## Group lifecycle regression check
+- `pnpm --filter @workspace/scripts exec tsx --test ../artifacts/api-server/src/lib/group-formation.test.ts`
+- Uses unique, temporary fixture records and deletes only its own fixtures. Do not delete user records during browser tests.

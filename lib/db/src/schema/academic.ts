@@ -1,4 +1,4 @@
-import { pgTable, text, boolean, timestamp, jsonb, integer, numeric, primaryKey, index, check } from "drizzle-orm/pg-core";
+import { pgTable, text, boolean, timestamp, jsonb, integer, numeric, primaryKey, index, uniqueIndex, check } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 const created = () => timestamp("created_at",{withTimezone:true}).notNull().defaultNow();
 const data = () => jsonb("data").notNull().default({});
@@ -21,10 +21,14 @@ export const ltAssignments=pgTable("lt_assignments",{
 export const ltGroups=pgTable("lt_groups",{
   id:text("id").primaryKey(),assignmentId:text("assignment_id").notNull().references(()=>ltAssignments.id),
   title:text("title").notNull(),code:text("code").notNull().unique(),createdAt:created(),
+  leaderId:text("leader_id").references(()=>ltUsers.id),
+  inviteActive:boolean("invite_active").notNull().default(true),
+  inviteExpiresAt:timestamp("invite_expires_at",{withTimezone:true}),
 });
 export const ltGroupMembers=pgTable("lt_group_members",{
   groupId:text("group_id").references(()=>ltGroups.id),userId:text("user_id").references(()=>ltUsers.id),
-},t=>[primaryKey({columns:[t.groupId,t.userId]})]);
+  assignmentId:text("assignment_id").notNull().references(()=>ltAssignments.id),
+},t=>[primaryKey({columns:[t.groupId,t.userId]}),uniqueIndex("lt_members_one_group_per_assignment").on(t.assignmentId,t.userId)]);
 export const ltTasks=pgTable("lt_tasks",{
   id:text("id").primaryKey(),groupId:text("group_id").notNull().references(()=>ltGroups.id),
   assigneeId:text("assignee_id").references(()=>ltUsers.id),creatorId:text("creator_id").notNull().references(()=>ltUsers.id),

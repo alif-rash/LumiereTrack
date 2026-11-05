@@ -7,6 +7,7 @@
 
 export * from './actionInput';
 export * from './actionInputAction';
+export * from './actionInputFormationStatus';
 export * from './actionInputPriority';
 export * from './actionInputRole';
 export * from './actionInputScope';
@@ -15,9 +16,11 @@ export * from './chatAnswer';
 export * from './chatInput';
 export * from './counts';
 export * from './healthStatus';
+export * from './invitationPreview';
 export * from './profile';
 export * from './profileRole';
 export * from './record';
+export * from './recordFormationStatus';
 export * from './uploadInput';
 export * from './uploadResult';
 export * from './workspace';

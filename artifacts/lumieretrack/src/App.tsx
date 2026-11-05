@@ -17,6 +17,7 @@ import Dashboard from "@/pages/dashboard";
 import Courses from "@/pages/courses";
 import CourseDetail from "@/pages/course-detail";
 import Projects from "@/pages/projects";
+import Assignments from "@/pages/assignments";
 import ProjectDetail from "@/pages/project-detail";
 import Tasks from "@/pages/tasks";
 import Reviews from "@/pages/reviews";
@@ -145,7 +146,7 @@ function ClerkQueryClientCacheInvalidator() {
 function LoadingShell() {
   return (
     <div className="min-h-[100dvh] bg-background lg:pl-[256px]">
-      <div className="fixed inset-y-0 left-0 hidden w-[256px] border-r bg-card p-5 lg:block">
+      <div className="sidebar-navy fixed inset-y-0 left-0 hidden w-[256px] p-5 lg:block">
         <SkeletonBlock className="h-8 w-36" />
         <div className="mt-10 space-y-3">{Array.from({ length: 7 }).map((_, i) => <SkeletonBlock key={i} className="h-8" />)}</div>
       </div>
@@ -219,6 +220,7 @@ function ClerkProviderWithRoutes() {
               <Route path="/dashboard"><Protected><Dashboard /></Protected></Route>
               <Route path="/courses"><Protected><Courses /></Protected></Route>
               <Route path="/courses/:id"><Protected><CourseDetail /></Protected></Route>
+              <Route path="/assignments"><Protected><Assignments /></Protected></Route>
               <Route path="/projects"><Protected><Projects /></Protected></Route>
               <Route path="/projects/:id"><Protected><ProjectDetail /></Protected></Route>
               <Route path="/tasks"><Protected><Tasks /></Protected></Route>

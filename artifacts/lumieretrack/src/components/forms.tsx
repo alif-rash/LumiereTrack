@@ -1,5 +1,7 @@
 import { useState, type ReactElement, type ReactNode } from "react";
-import { Paperclip } from "lucide-react";
+import { Paperclip, AlertCircle } from "lucide-react";
+import { useLocation } from "wouter";
+import { usePreviewGroupInvitation, getPreviewGroupInvitationQueryKey } from "@workspace/api-client-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Field } from "@/components/kit";
+import { Field, fmtDate } from "@/components/kit";
 import { useToast } from "@/hooks/use-toast";
 import { useAct, useWs, uploadFile, validUrl, errMsg, isProf, groupCtx, nameOf, type Rec } from "@/lib/ws";
 
@@ -81,18 +83,86 @@ export function CourseDialog({ trigger, course }: { trigger: ReactElement; cours
   );
 }
 
-export function JoinDialog({ trigger, kind }: { trigger: ReactElement; kind: "course" | "group" }) {
+export function JoinDialog({ trigger, kind, expectedAssignmentId }: { trigger: ReactElement; kind: "course" | "group"; expectedAssignmentId?: string }) {
   const { run, pending } = useAct();
   const [open, setOpen] = useState(false);
   const [code, setCode] = useState("");
+  if (kind === "group") return <GroupJoinDialog trigger={trigger} expectedAssignmentId={expectedAssignmentId} />;
   return (
-    <Modal trigger={trigger} open={open} setOpen={setOpen} pending={pending} title={kind === "course" ? "Join a course" : "Join a project group"} description={kind === "course" ? "Enter the invite code your professor shared." : "Enter the group code a teammate shared with you."} submitLabel="Join"
+    <Modal trigger={trigger} open={open} setOpen={setOpen} pending={pending} title="Join a course" description="Enter the invite code your professor shared." submitLabel="Join"
       onSubmit={async () => {
-        const r = await run({ action: kind === "course" ? "joinCourse" : "joinGroup", code: code.trim() });
+        const r = await run({ action: "joinCourse", code: code.trim() });
         if (r) { setOpen(false); setCode(""); }
       }}>
       <Field label="Invite code"><Input required value={code} onChange={(e) => setCode(e.target.value)} className="font-mono-num uppercase tracking-widest" placeholder="XXXXXX" data-testid="input-join-code" /></Field>
     </Modal>
+  );
+}
+
+function GroupJoinDialog({ trigger, expectedAssignmentId }: { trigger: ReactElement; expectedAssignmentId?: string }) {
+  const { run, pending, error, reset } = useAct();
+  const [, setLocation] = useLocation();
+  const [open, setOpen] = useState(false);
+  const [code, setCode] = useState("");
+  const [lookup, setLookup] = useState("");
+  const pv = usePreviewGroupInvitation(lookup, { query: { queryKey: getPreviewGroupInvitationQueryKey(lookup), enabled: open && !!lookup, retry: false, staleTime: 0 } });
+  const preview = lookup && !pv.isError && !pv.isFetching && pv.data ? pv.data : undefined;
+  const mismatch = !!(preview && expectedAssignmentId && preview.assignmentId !== expectedAssignmentId);
+  const full = !!(preview && preview.remainingSlots <= 0);
+  const close = (v: boolean) => { if (pending) return; setOpen(v); if (!v) { setCode(""); setLookup(""); reset(); } };
+  const onCode = (v: string) => { setCode(v); setLookup(""); reset(); };
+  const check = () => { const c = code.trim(); if (c) { reset(); if(c===lookup) void pv.refetch(); else setLookup(c); } };
+  const confirm = async () => {
+    if (!preview || mismatch) return;
+    const r = await run({ action: "joinGroup", code: lookup, ...(expectedAssignmentId ? { assignmentId: expectedAssignmentId } : {}) });
+    if (r) { close(false); setLocation(`/projects/${r.id || preview.id}`); }
+  };
+  return (
+    <Dialog open={open} onOpenChange={close}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="font-display text-xl">Join an existing group</DialogTitle>
+          <DialogDescription>Check the invitation code first. You'll see the group and assignment before anything changes.</DialogDescription>
+        </DialogHeader>
+        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); if (preview) void confirm(); else check(); }}>
+          <Field label="Invitation code">
+            <div className="flex gap-2">
+              <Input required autoFocus value={code} disabled={pending} onChange={(e) => onCode(e.target.value)} className="font-mono-num uppercase tracking-widest" placeholder="XXXXXX" data-testid="input-join-code" />
+              <Button type="button" variant="outline" disabled={!code.trim() || pending || (pv.isFetching && !!lookup)} onClick={check} data-testid="button-check-code">{pv.isFetching && lookup ? "Checking…" : "Check code"}</Button>
+            </div>
+          </Field>
+          {lookup && pv.isFetching && !preview && <div className="h-28 animate-pulse rounded-xl bg-[hsl(var(--soft))]" />}
+          {lookup && pv.isError && (
+            <div className="flex gap-3 rounded-xl border border-destructive/25 bg-destructive/5 p-3 text-sm" data-testid="text-preview-error">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+              <div><div className="font-semibold">This code can't be used</div><div className="text-muted-foreground">{errMsg(pv.error)}</div></div>
+            </div>
+          )}
+          {preview && (
+            <div className="tone-teal overflow-hidden rounded-xl border t-border" data-testid="card-invitation-preview">
+              <div className="t-soft px-4 py-3">
+                <div className="font-mono-num text-[11px] t-fg">{preview.courseCode} · {preview.courseName}</div>
+                <div className="font-display text-lg font-bold" data-testid="text-preview-group">{preview.title}</div>
+                <div className="text-xs text-muted-foreground" data-testid="text-preview-assignment">{preview.assignmentTitle}</div>
+              </div>
+              <div className="grid grid-cols-3 divide-x bg-card text-center">
+                <div className="p-3"><div className="font-mono-num text-lg font-semibold">{preview.memberCount}/{preview.groupSize}</div><div className="text-[10px] uppercase tracking-wider text-muted-foreground">Members</div></div>
+                <div className="p-3"><div className="font-mono-num text-lg font-semibold">{preview.remainingSlots}</div><div className="text-[10px] uppercase tracking-wider text-muted-foreground">Open slots</div></div>
+                <div className="p-3"><div className="text-sm font-semibold">{preview.inviteExpiresAt ? fmtDate(preview.inviteExpiresAt, "MMM d") : "No expiry"}</div><div className="text-[10px] uppercase tracking-wider text-muted-foreground">Code expires</div></div>
+              </div>
+            </div>
+          )}
+          {mismatch && <p className="rounded-xl bg-destructive/5 p-3 text-sm text-destructive" data-testid="text-preview-mismatch">This code belongs to a different assignment ({preview?.assignmentTitle}). Ask for the code to a group on this assignment.</p>}
+          {full && !mismatch && <p className="rounded-xl bg-destructive/5 p-3 text-sm text-destructive">This group is already full.</p>}
+          {error && <p className="rounded-xl bg-destructive/5 p-3 text-sm text-destructive" data-testid="text-join-error">{error}</p>}
+          <DialogFooter className="gap-2 pt-2">
+            <Button type="button" variant="ghost" disabled={pending} onClick={() => close(false)} data-testid="button-cancel">Cancel</Button>
+            <Button type="submit" disabled={pending || !preview || mismatch || full} data-testid="button-confirm-join">{pending ? "Joining…" : "Confirm join"}</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -111,19 +181,34 @@ export function AddStudentDialog({ trigger, courseId }: { trigger: ReactElement;
   );
 }
 
+function SwitchRow({ title, body, checked, onChange, testId, disabled }: { title: string; body: string; checked: boolean; onChange: (v: boolean) => void; testId: string; disabled?: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-xl border bg-[hsl(var(--soft)/0.5)] px-4 py-3">
+      <div><div className="text-sm font-semibold">{title}</div><div className="text-xs text-muted-foreground">{body}</div></div>
+      <Switch checked={checked} disabled={disabled} onCheckedChange={onChange} data-testid={testId} />
+    </div>
+  );
+}
+
 export function AssignmentDialog({ trigger, courseId, assignment }: { trigger: ReactElement; courseId: string; assignment?: Rec }) {
+  const { toast } = useToast();
   const { run, pending } = useAct();
   const [open, setOpen] = useState(false);
   const a = assignment;
+  const self0 = a?.selfGroups ?? true;
   const [f, setF] = useState({
     title: a?.title ?? "", description: a?.description ?? "", instructions: a?.instructions ?? "", deliverables: a?.deliverables ?? "", rubric: a?.rubric ?? "",
-    startDate: day(a?.startDate), dueDate: day(a?.dueDate), groupSize: String(a?.groupSize ?? 4), maxMarks: String(a?.maxMarks ?? 100), selfGroups: a?.selfGroups ?? true,
+    startDate: day(a?.startDate), dueDate: day(a?.dueDate), groupSize: String(a?.groupSize ?? 4), maxMarks: String(a?.maxMarks ?? 100), selfGroups: self0,
+    allowJoin: a?.allowJoin ?? self0, allowMemberManagement: a?.allowMemberManagement ?? true, formationStatus: (a?.formationStatus ?? "open") as "open" | "closed",
+    groupFormationDeadline: day(a?.groupFormationDeadline), minGroupSize: String(a?.minGroupSize ?? 1),
   });
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF({ ...f, [k]: e.target.value });
   return (
     <Modal trigger={trigger} open={open} setOpen={setOpen} pending={pending} title={a ? "Edit assignment" : "New group assignment"} submitLabel={a ? "Save assignment" : "Publish assignment"}
       onSubmit={async () => {
-        const body = { ...f, groupSize: Number(f.groupSize), maxMarks: Number(f.maxMarks), courseId };
+        const size = Number(f.groupSize), min = Number(f.minGroupSize);
+        if (!(min >= 1 && min <= size)) return void toast({ title: `Minimum group size must be between 1 and ${size}`, variant: "destructive" });
+        const body = { ...f, groupSize: size, minGroupSize: min, maxMarks: Number(f.maxMarks), courseId };
         const r = await run(a ? { action: "editAssignment", id: a.id, ...body } : { action: "createAssignment", ...body });
         if (r) setOpen(false);
       }}>
@@ -135,15 +220,26 @@ export function AssignmentDialog({ trigger, courseId, assignment }: { trigger: R
       <div className="grid grid-cols-2 gap-3">
         <Field label="Opens"><Input type="date" value={f.startDate} onChange={set("startDate")} data-testid="input-assignment-start" /></Field>
         <Field label="Due"><Input type="date" required value={f.dueDate} onChange={set("dueDate")} data-testid="input-assignment-due" /></Field>
+        <Field label="Min group size"><Input type="number" min={1} max={Number(f.groupSize) || 30} value={f.minGroupSize} onChange={set("minGroupSize")} data-testid="input-assignment-min-size" /></Field>
         <Field label="Max group size"><Input type="number" min={2} max={30} value={f.groupSize} onChange={set("groupSize")} data-testid="input-assignment-size" /></Field>
         <Field label="Max marks"><Input type="number" min={1} value={f.maxMarks} onChange={set("maxMarks")} data-testid="input-assignment-marks" /></Field>
       </div>
-      <div className="flex items-center justify-between rounded-xl border bg-[hsl(var(--soft)/0.5)] px-4 py-3">
-        <div>
-          <div className="text-sm font-semibold">Students form their own groups</div>
-          <div className="text-xs text-muted-foreground">Off means only you can create groups.</div>
+      <div className="rounded-2xl border p-3">
+        <div className="mb-3 px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Group formation</div>
+        <div className="grid grid-cols-2 gap-3 px-1 pb-3">
+          <Field label="Formation status">
+            <Select value={f.formationStatus} onValueChange={(v) => setF({ ...f, formationStatus: v as "open" | "closed" })}>
+              <SelectTrigger data-testid="select-formation-status"><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="open">Open</SelectItem><SelectItem value="closed">Closed</SelectItem></SelectContent>
+            </Select>
+          </Field>
+          <Field label="Formation deadline" hint="Blank uses the due date."><Input type="date" value={f.groupFormationDeadline} onChange={set("groupFormationDeadline")} data-testid="input-formation-deadline" /></Field>
         </div>
-        <Switch checked={f.selfGroups} onCheckedChange={(v) => setF({ ...f, selfGroups: v })} data-testid="switch-self-groups" />
+        <div className="space-y-2">
+          <SwitchRow title="Students create their own groups" body="Off means only you create groups." checked={f.selfGroups} onChange={(v) => setF({ ...f, selfGroups: v })} testId="switch-self-groups" />
+          <SwitchRow title="Students join with a code" body="Leaders can share invitation codes while formation is open." checked={f.allowJoin} onChange={(v) => setF({ ...f, allowJoin: v })} testId="switch-allow-join" />
+          <SwitchRow title="Leaders manage membership" body="Leaders may remove members without recorded work." checked={f.allowMemberManagement} onChange={(v) => setF({ ...f, allowMemberManagement: v })} testId="switch-member-management" />
+        </div>
       </div>
     </Modal>
   );
@@ -152,40 +248,55 @@ export function AssignmentDialog({ trigger, courseId, assignment }: { trigger: R
 export function GroupDialog({ trigger, assignmentId }: { trigger: ReactElement; assignmentId?: string }) {
   const ws = useWs();
   const prof = isProf(ws);
+  const [, setLocation] = useLocation();
   const { run, pending } = useAct();
   const [open, setOpen] = useState(false);
   const [aid, setAid] = useState(assignmentId ?? "");
   const [title, setTitle] = useState("");
   const [members, setMembers] = useState<string[]>([]);
-  const options = ws.assignments.filter((a) => prof || a.selfGroups !== false);
-  const course = ws.courses.find((c) => c.id === ws.assignments.find((a) => a.id === aid)?.courseId);
-  const students = ws.people.filter((p) => course?.memberIds?.includes(p.id));
+  const options = prof ? ws.assignments : (ws.openAssignments ?? []).filter((a) => a.canCreateGroup);
+  const chosen = ws.assignments.find((a) => a.id === aid) ?? options.find((a) => a.id === aid);
+  const course = ws.courses.find((c) => c.id === chosen?.courseId);
+  const taken = new Set(ws.groups.filter((g) => g.assignmentId === aid).flatMap((g) => g.memberIds ?? []));
+  const students = ws.people.filter((p) => course?.memberIds?.includes(p.id) && p.role !== "professor" && !taken.has(p.id));
+  const noOptions = !assignmentId && !options.length;
   return (
-    <Modal trigger={trigger} open={open} setOpen={setOpen} pending={pending} title="Create a project group" description={prof ? "Assign students now or let them join with the group code." : "You'll join this group automatically."} submitLabel="Create group"
+    <Modal trigger={trigger} open={open} setOpen={setOpen} pending={pending || noOptions} title="Create a project group" description={prof ? "Assign students now or let them join with the group code." : "You'll become the group leader and can invite teammates with a code."} submitLabel="Create group"
       onSubmit={async () => {
+        if (!aid) return;
         const r = await run({ action: "createGroup", assignmentId: aid, title, ...(prof ? { memberIds: members } : {}) });
-        if (r) { setOpen(false); setTitle(""); setMembers([]); }
+        if (r) { setOpen(false); setTitle(""); setMembers([]); if (r.id) setLocation(`/projects/${r.id}`); }
       }}>
-      {!assignmentId && (
-        <Field label="Assignment">
-          <Select value={aid} onValueChange={setAid}>
-            <SelectTrigger data-testid="select-assignment"><SelectValue placeholder={options.length ? "Choose an assignment" : "No open assignments"} /></SelectTrigger>
-            <SelectContent>{options.map((a) => <SelectItem key={a.id} value={a.id}>{a.courseCode ? `${a.courseCode} · ` : ""}{a.title}</SelectItem>)}</SelectContent>
-          </Select>
-        </Field>
-      )}
-      <Field label="Group name"><Input required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Team Meridian" data-testid="input-group-title" /></Field>
-      {prof && aid && (
-        <Field label="Members" hint={students.length ? `${members.length} selected` : "No students enrolled in this course yet."}>
-          <div className="max-h-48 space-y-1 overflow-y-auto rounded-xl border p-2">
-            {students.map((s) => (
-              <label key={s.id} className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 text-sm hover:bg-accent">
-                <Checkbox checked={members.includes(s.id)} onCheckedChange={(v) => setMembers(v ? [...members, s.id] : members.filter((m) => m !== s.id))} data-testid={`checkbox-member-${s.id}`} />
-                <span className="font-medium">{s.name}</span><span className="text-xs text-muted-foreground">{s.email}</span>
-              </label>
-            ))}
-          </div>
-        </Field>
+      {noOptions ? (
+        <div className="rounded-xl border border-dashed bg-[hsl(var(--soft)/0.6)] p-4 text-sm" data-testid="text-no-group-options">
+          <div className="font-semibold">No assignment is open for new groups</div>
+          <p className="mt-1 text-muted-foreground">{prof ? "Create an assignment in one of your courses first." : "Either formation has closed, your professor forms groups, or you're already in a group for each open assignment. You can still join with a code."}</p>
+        </div>
+      ) : (
+        <>
+          {!assignmentId && (
+            <Field label="Assignment">
+              <Select value={aid} onValueChange={(v) => { setAid(v); setMembers([]); }}>
+                <SelectTrigger data-testid="select-assignment"><SelectValue placeholder="Choose an assignment" /></SelectTrigger>
+                <SelectContent>{options.map((a) => <SelectItem key={a.id} value={a.id}>{a.courseCode ? `${a.courseCode} · ` : ""}{a.title}</SelectItem>)}</SelectContent>
+              </Select>
+            </Field>
+          )}
+          {chosen && <p className="text-xs text-muted-foreground">Groups of {chosen.minGroupSize ?? 1}–{chosen.groupSize ?? "?"} students{chosen.groupFormationDeadline ? ` · forming until ${fmtDate(chosen.groupFormationDeadline)}` : ""}</p>}
+          <Field label="Group name"><Input required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Team Meridian" data-testid="input-group-title" /></Field>
+          {prof && aid && (
+            <Field label="Members" hint={students.length ? `${members.length} selected · max ${chosen?.groupSize ?? "?"}` : "No ungrouped students in this course."}>
+              <div className="max-h-48 space-y-1 overflow-y-auto rounded-xl border p-2">
+                {students.map((s) => (
+                  <label key={s.id} className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 text-sm hover:bg-accent">
+                    <Checkbox checked={members.includes(s.id)} onCheckedChange={(v) => setMembers(v ? [...members, s.id] : members.filter((m) => m !== s.id))} data-testid={`checkbox-member-${s.id}`} />
+                    <span className="font-medium">{s.name}</span><span className="text-xs text-muted-foreground">{s.email}</span>
+                  </label>
+                ))}
+              </div>
+            </Field>
+          )}
+        </>
       )}
     </Modal>
   );
