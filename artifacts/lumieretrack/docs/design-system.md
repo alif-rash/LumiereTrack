@@ -44,4 +44,4 @@ There is a single `.rise` entrance at 0.4s with a short stagger. Hover changes c
 Use lucide at a 1.75 stroke, sized 14–16px, in muted ink. Icon-only buttons must have `aria-label`.
 
 ## Rules
-No emojis. No invented logo: a dashed reserved square marks where the mark will go. No fabricated people, marks or stats in marketing. The landing preview is an explicitly labelled schematic.
+No emojis. Use the user-approved polished purple LT logo with its gold sparkle, sweeping tail, and teamwork detail. Keep the LumiereTrack name unchanged. On dark backgrounds, show the mark on a white backing so its purple details remain legible. No fabricated people, marks or stats in marketing. The landing preview is an explicitly labelled schematic.

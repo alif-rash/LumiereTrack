@@ -10,6 +10,6 @@ Preserve the academic-ledger visual direction when extending LumiereTrack.
 
 Logo refinements should preserve the uploaded concept: the purple LT lettermark, gold sparkle, sweeping tail, and teamwork symbolism.
 
-**Why:** On 2026-11-06 the user confirmed they liked the logo and twice requested polish without changing its underlying idea. They want to review refinements in the app preview before deciding whether to keep them.
+**Why:** On 2026-11-06 the user confirmed they liked the logo, requested polish without changing its underlying idea, and explicitly selected “Keep polished version” after reviewing the refined header preview. The polished version is approved for official use.
 
-**How to apply:** Treat future logo work as refinement rather than rebranding. Keep unapproved refinements limited to the preview instead of automatically updating official branding.
+**How to apply:** Preserve the approved concept. Treat future logo work as refinement rather than rebranding, and preview further changes for approval before replacing the official mark.

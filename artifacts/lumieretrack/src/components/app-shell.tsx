@@ -10,21 +10,16 @@ import { useWs, isProf } from "@/lib/ws";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
-export function Brand({ light, previewLogo = false }: { light?: boolean; previewLogo?: boolean }) {
+export function Brand({ light }: { light?: boolean }) {
   return (
     <div className="flex items-center gap-2.5">
-      {/* Trial mark is opt-in; official branding stays unchanged until approval. */}
-      {previewLogo ? (
-        <img
-          src={`${basePath}/logo-preview-polished.svg`}
-          alt="Refined LumiereTrack logo preview"
-          width="44"
-          height="36"
-          className="h-9 w-11 shrink-0 object-contain mix-blend-multiply"
-        />
-      ) : (
-        <span aria-hidden className={cn("h-7 w-7 border border-dashed", light ? "border-white/30" : "border-foreground/30")} />
-      )}
+      <img
+        src={`${basePath}/lumiere-logo.svg`}
+        alt=""
+        width="44"
+        height="36"
+        className={cn("h-9 w-11 shrink-0 object-contain", light ? "rounded-[2px] bg-white" : "mix-blend-multiply")}
+      />
       <span className={cn("font-display text-[19px] font-semibold tracking-tight", light ? "text-[hsl(42_38%_97%)]" : "text-foreground")}>LumiereTrack</span>
     </div>
   );

@@ -7,7 +7,7 @@ University group-project collaboration, documented contributions, professor revi
 - Individual marks are visible only to the student and authorized course professors. Never include them in shared activity or group notifications.
 - Completion is approved tasks divided by assigned tasks; it is not a measure of total effort or academic quality.
 - Preserve submission, review and grading histories.
-- The user will supply the actual logo. Reserve space; do not generate a replacement logo.
+- Use the user-approved polished logo based on their supplied artwork: purple LT lettermark, gold sparkle, sweeping tail, and teamwork detail. Keep the LumiereTrack name; do not invent a replacement logo.
 - No hardcoded academic statistics, fake uploads or decorative nonfunctional controls.
 - Improve the existing application incrementally; preserve existing academic data and professor workflows.
 
