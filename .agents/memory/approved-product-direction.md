@@ -13,3 +13,9 @@ Logo refinements should preserve the uploaded concept: the purple LT lettermark,
 **Why:** On 2026-11-06 the user confirmed they liked the logo, requested polish without changing its underlying idea, and explicitly selected “Keep polished version” after reviewing the refined header preview. The polished version is approved for official use.
 
 **How to apply:** Preserve the approved concept. Treat future logo work as refinement rather than rebranding, and preview further changes for approval before replacing the official mark.
+
+Logo backgrounds must be transparent, not white tiles.
+
+**Why:** On 2026-11-06 the user explicitly rejected the white backing and requested that green or other surrounding background colours show through.
+
+**How to apply:** Use genuinely transparent logo assets. Maintain legibility on dark surfaces with a light foreground version, not a solid background.
