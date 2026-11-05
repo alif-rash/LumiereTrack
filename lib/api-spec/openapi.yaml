@@ -1,36 +1,234 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
-  version: 0.1.0
-  description: API specification
+  version: 1.0.0
 servers:
   - url: /api
-    description: Base API path
-tags:
-  - name: health
-    description: Health operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
-      tags: [health]
-      summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/HealthStatus"
+              schema: { $ref: "#/components/schemas/HealthStatus" }
+  /workspace:
+    get:
+      operationId: getWorkspace
+      responses:
+        "200":
+          description: Role-filtered workspace, also includes computed dashboard counts.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Workspace" }
+  /actions:
+    post:
+      operationId: performAction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ActionInput" }
+      responses:
+        "200":
+          description: Successful operation. Refetch workspace after every mutation.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ActionResult" }
+  /assistant:
+    post:
+      operationId: askAssistant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ChatInput" }
+      responses:
+        "200":
+          description: Answer based only on authorized data
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChatAnswer" }
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UploadInput" }
+      responses:
+        "200":
+          description: Upload file via PUT to uploadURL, store objectPath as evidence.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UploadResult" }
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
-        status:
+        status: { type: string }
+    Profile:
+      type: object
+      required: [id, name, email, role, university, major, semester, department, studentId, avatar]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        email: { type: string }
+        role: { type: string, enum: [student, professor, unassigned] }
+        university: { type: string }
+        major: { type: string }
+        semester: { type: string }
+        department: { type: string }
+        studentId: { type: string }
+        avatar: { type: string }
+    Record:
+      type: object
+      required: [id, title, createdAt]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        createdAt: { type: string }
+        description: { type: string }
+        courseId: { type: string }
+        courseCode: { type: string }
+        courseName: { type: string }
+        professorName: { type: string }
+        assignmentId: { type: string }
+        groupId: { type: string }
+        taskId: { type: string }
+        submissionId: { type: string }
+        userId: { type: string }
+        userName: { type: string }
+        assigneeId: { type: string }
+        createdBy: { type: string }
+        status: { type: string }
+        priority: { type: string }
+        dueDate: { type: string }
+        startDate: { type: string }
+        code: { type: string }
+        instructions: { type: string }
+        deliverables: { type: string }
+        rubric: { type: string }
+        selfGroups: { type: boolean }
+        groupSize: { type: integer }
+        maxMarks: { type: number }
+        marks: { type: number }
+        feedback: { type: string }
+        version: { type: integer }
+        scope: { type: string }
+        read: { type: boolean }
+        link: { type: string }
+        objectPath: { type: string }
+        fileName: { type: string }
+        memberIds: { type: array, items: { type: string } }
+        instructorIds: { type: array, items: { type: string } }
+        memberNames: { type: array, items: { type: string } }
+        progress: { type: number }
+    Counts:
+      type: object
+      required: [courses, projects, tasks, completed, pending, review]
+      properties:
+        courses: { type: integer }
+        projects: { type: integer }
+        tasks: { type: integer }
+        completed: { type: integer }
+        pending: { type: integer }
+        review: { type: integer }
+    Workspace:
+      type: object
+      required: [profile, people, courses, assignments, groups, tasks, submissions, reviews, grades, activity, notifications, counts]
+      properties:
+        profile: { $ref: "#/components/schemas/Profile" }
+        people: { type: array, items: { $ref: "#/components/schemas/Profile" } }
+        courses: { type: array, items: { $ref: "#/components/schemas/Record" } }
+        assignments: { type: array, items: { $ref: "#/components/schemas/Record" } }
+        groups: { type: array, items: { $ref: "#/components/schemas/Record" } }
+        tasks: { type: array, items: { $ref: "#/components/schemas/Record" } }
+        submissions: { type: array, items: { $ref: "#/components/schemas/Record" } }
+        reviews: { type: array, items: { $ref: "#/components/schemas/Record" } }
+        grades: { type: array, items: { $ref: "#/components/schemas/Record" } }
+        activity: { type: array, items: { $ref: "#/components/schemas/Record" } }
+        notifications: { type: array, items: { $ref: "#/components/schemas/Record" } }
+        counts: { $ref: "#/components/schemas/Counts" }
+    ActionInput:
+      type: object
+      required: [action]
+      properties:
+        action:
           type: string
-      required:
-        - status
-
+          enum: [onboard, updateProfile, createCourse, editCourse, joinCourse, addStudent, createAssignment, editAssignment, createGroup, joinGroup, createTask, editTask, updateTaskStatus, submit, review, grade, readNotification]
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        name: { type: string }
+        role: { type: string, enum: [student, professor] }
+        university: { type: string }
+        major: { type: string }
+        semester: { type: string }
+        department: { type: string }
+        studentId: { type: string }
+        avatar: { type: string }
+        email: { type: string }
+        code: { type: string }
+        courseCode: { type: string }
+        courseId: { type: string }
+        assignmentId: { type: string }
+        groupId: { type: string }
+        taskId: { type: string }
+        submissionId: { type: string }
+        userId: { type: string }
+        assigneeId: { type: string }
+        status: { type: string }
+        priority: { type: string, enum: [Low, Medium, High] }
+        dueDate: { type: string }
+        startDate: { type: string }
+        instructions: { type: string }
+        deliverables: { type: string }
+        rubric: { type: string }
+        selfGroups: { type: boolean }
+        groupSize: { type: integer, minimum: 2, maximum: 30 }
+        maxMarks: { type: number, minimum: 1 }
+        marks: { type: number, minimum: 0 }
+        feedback: { type: string }
+        scope: { type: string, enum: [group, individual] }
+        link: { type: string }
+        objectPath: { type: string }
+        fileName: { type: string }
+        memberIds: { type: array, items: { type: string } }
+    ActionResult:
+      type: object
+      required: [success, message]
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        id: { type: string }
+    ChatInput:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string, minLength: 1, maxLength: 2000 }
+        groupId: { type: string }
+    ChatAnswer:
+      type: object
+      required: [answer]
+      properties:
+        answer: { type: string }
+    UploadInput:
+      type: object
+      required: [name, size, contentType, groupId]
+      properties:
+        name: { type: string }
+        size: { type: integer, minimum: 1, maximum: 20971520 }
+        contentType: { type: string }
+        groupId: { type: string }
+    UploadResult:
+      type: object
+      required: [uploadURL, objectPath]
+      properties:
+        uploadURL: { type: string }
+        objectPath: { type: string }

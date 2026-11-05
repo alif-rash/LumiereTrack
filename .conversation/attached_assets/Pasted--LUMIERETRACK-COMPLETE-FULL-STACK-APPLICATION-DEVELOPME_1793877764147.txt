@@ -1,0 +1,991 @@
+# LUMIERETRACK – COMPLETE FULL-STACK APPLICATION DEVELOPMENT PROMPT
+
+Build a complete, fully functional, modern web application called **LumiereTrack**.
+
+LumiereTrack is a university group-project management, collaboration and contribution tracking platform designed to improve teamwork, individual accountability, transparency and communication between university students and professors.
+
+This must be a real, working full-stack application, not just a visual prototype.
+
+The platform will allow students to manage multiple university courses, participate in group assignments, divide responsibilities, submit their individual contributions, monitor group progress and receive feedback and marks from their professors.
+
+Professors will have separate accounts and dashboards where they can manage their courses, create group assignments, monitor student contributions, review submissions, provide feedback and grade students.
+
+**IMPORTANT SCOPE RESTRICTION**
+
+LumiereTrack is exclusively designed for GROUP PROJECTS and GROUP ASSIGNMENTS.
+
+Do not build an individual assignment management or individual assignment submission platform.
+
+Students can have individual responsibilities and tasks within a group project, but the overall assignment must belong to a group.
+
+---
+
+# 1. PRODUCT IDENTITY AND DESIGN DIRECTION
+
+Application name: LumiereTrack
+
+Colour identity: Blue and White.
+
+The application should look like a premium, professionally designed university productivity platform.
+
+It must NOT look like a generic AI-generated admin dashboard or a basic template.
+
+I want a distinctive visual identity, thoughtful layouts, beautiful typography and a polished user experience.
+
+### Colour palette
+
+Use a sophisticated blue-and-white palette:
+
+- Deep navy: #142B4A
+- Primary blue: #3478D4
+- Soft blue: #EAF2FC
+- White: #FFFFFF
+- Background: #F7F9FC
+- Muted text: #718096
+- Success green: #299D70
+- Warning amber: #E6A23C
+- Error red: #D9534F
+
+Use blue as the primary brand colour and white as the dominant interface colour.
+
+### Visual design
+
+Use:
+- Modern typography such as Inter, Manrope or Plus Jakarta Sans.
+- Beautifully structured dashboards.
+- A clean and elegant sidebar.
+- Consistent spacing and alignment.
+- Carefully designed cards.
+- Attractive charts and progress indicators.
+- Subtle borders and shadows.
+- Smooth, restrained animations.
+- Clear visual hierarchy.
+- Professional tables and timelines.
+- Consistent icons.
+- Beautiful empty states and loading states.
+- Responsive layouts.
+
+Avoid:
+- Excessive gradients.
+- Too many identical statistic cards.
+- Random decorative illustrations.
+- Oversized unnecessary icons.
+- Cluttered dashboards.
+- Excessive animations.
+- Generic AI-generated layouts.
+- Inconsistent colours and typography.
+
+Create a dedicated space in the navigation/sidebar and login screen for the LumiereTrack logo. I will provide the actual logo later. Do not invent or permanently generate a replacement logo.
+
+The student and professor experiences should have distinct layouts while maintaining the same overall brand identity.
+
+---
+
+# 2. USER ROLES AND AUTHENTICATION
+
+There must be two main user roles:
+
+1. Student
+2. Professor / Instructor
+
+Implement secure registration, login and logout.
+
+Every user must have an individual account.
+
+### Student profile
+
+Each student profile should contain:
+
+- Profile picture.
+- Full name.
+- University email.
+- Student ID (optional).
+- University.
+- Programme / major.
+- Semester.
+- Enrolled courses.
+- Active group projects.
+- Contribution overview.
+
+Students should be able to edit their personal profile information.
+
+### Professor profile
+
+Each professor profile should contain:
+
+- Profile picture.
+- Full name.
+- University email.
+- Department.
+- Courses taught.
+- Active projects.
+- Number of students.
+- Profile settings.
+
+Professors should be able to edit their profile information.
+
+### Access control
+
+Implement role-based permissions.
+
+- Students must not access professor-only functions.
+- Students must not modify official marks.
+- Professors must only access courses and projects they are authorised to manage.
+- Group members can access their shared group workspace.
+- Users must not access private information belonging to unrelated users or groups.
+
+---
+
+# 3. STUDENT DASHBOARD
+
+Create a personalised dashboard that appears immediately after a student logs in.
+
+The dashboard should function as the student's central academic group-project workspace.
+
+### Overview section
+
+Display:
+
+- Total enrolled courses.
+- Active group projects.
+- Total assigned tasks.
+- Completed tasks.
+- Pending submissions.
+- Tasks awaiting review.
+- Recent marks.
+
+### My Projects
+
+Display all active group projects in visually attractive project cards.
+
+Each card should include:
+
+- Project title.
+- Course name.
+- Professor name.
+- Group members.
+- Project deadline.
+- Overall completion percentage.
+- Current project status.
+- A button to open the project workspace.
+
+### My Tasks
+
+Show tasks currently assigned to the logged-in student.
+
+Display:
+
+- Task title.
+- Project name.
+- Course.
+- Deadline.
+- Priority.
+- Current status.
+
+Allow students to filter tasks by status and deadline.
+
+### Upcoming Deadlines
+
+Show upcoming deadlines from all enrolled courses and group projects.
+
+### Recent Activity
+
+Display:
+- Recent submissions.
+- New task assignments.
+- Professor feedback.
+- Grade updates.
+- Group activity.
+
+### Notifications
+
+Display unread notifications and important updates.
+
+All information must be dynamically retrieved from the database.
+
+Do not use permanently hardcoded statistics.
+
+---
+
+# 4. COURSE MANAGEMENT
+
+Students can be enrolled in multiple university courses.
+
+Each course can have a different professor.
+
+Create a dedicated **My Courses** page.
+
+Each course should contain:
+
+- Course name.
+- Course code.
+- Course description.
+- Assigned professor or professors.
+- Enrolled students.
+- Group assignments.
+- Active group projects.
+- Completed projects.
+
+### Professor course management
+
+Professors must be able to:
+
+- Create courses.
+- Edit course details.
+- Add or manage enrolled students.
+- View enrolled students.
+- View groups within a course.
+- Create group assignments.
+- View project progress.
+
+### Course relationships
+
+Support the following relationships:
+
+- One student can belong to multiple courses.
+- One professor can teach multiple courses.
+- One course can have multiple group assignments.
+- One group assignment belongs to a specific course.
+- One course can have one or more authorised professors.
+- Different courses must have separate assignments, groups, feedback and grading records.
+
+Do not mix data between courses.
+
+---
+
+# 5. GROUP ASSIGNMENT CREATION
+
+Professors must be able to create group assignments within their courses.
+
+When creating an assignment, the professor should provide:
+
+- Assignment title.
+- Course.
+- Description.
+- Instructions.
+- Maximum marks.
+- Start date.
+- Submission deadline.
+- Group size limit.
+- Required deliverables.
+- Grading criteria or rubric.
+- Assigned professor or reviewers.
+
+Allow the professor to choose whether students create their own groups or whether the professor creates and assigns groups.
+
+Students must be able to:
+
+- Create a group if permitted.
+- Join a group using an invitation code.
+- Invite other students.
+- View their group members.
+- View the assignment instructions.
+- Access the shared project workspace.
+
+Each group assignment must have its own independent workspace.
+
+A course may contain multiple group assignments, and a student may belong to different groups for different assignments.
+
+---
+
+# 6. GROUP PROJECT WORKSPACE
+
+This is the central feature of LumiereTrack.
+
+When a student opens a group assignment, display a dedicated workspace.
+
+Include the following navigation tabs:
+
+1. Overview.
+2. Tasks.
+3. Timeline.
+4. Contributions.
+5. Submissions.
+6. Feedback.
+7. Reports.
+
+### Project overview
+
+Display:
+
+- Project name.
+- Course name.
+- Professor.
+- Group members.
+- Project deadline.
+- Overall progress.
+- Completed tasks.
+- Pending tasks.
+- Recent activity.
+- Upcoming milestones.
+
+### Group members
+
+Display each member's:
+
+- Name.
+- Profile picture.
+- Assigned responsibilities.
+- Current tasks.
+- Contribution status.
+
+Make it easy to understand who is responsible for each part of the project.
+
+---
+
+# 7. TASK MANAGEMENT AND RESPONSIBILITY ASSIGNMENT
+
+Every group project must have an internal task management system.
+
+Group members should be able to create tasks and assign responsibilities to individual members.
+
+Each task must contain:
+
+- Task title.
+- Task description.
+- Assigned student.
+- Created by.
+- Priority.
+- Start date.
+- Due date.
+- Current status.
+- Attached files or reference links.
+
+### Task statuses
+
+Use the following statuses:
+
+- To Do.
+- In Progress.
+- Submitted.
+- Under Review.
+- Changes Requested.
+- Approved.
+
+Create a visually attractive Kanban-style taskboard.
+
+The taskboard should have separate columns for each status.
+
+Allow authorised users to:
+
+- Create tasks.
+- Assign tasks to group members.
+- Edit task details.
+- Update task status.
+- Set deadlines.
+- Add descriptions.
+- Attach supporting files.
+- Submit completed tasks.
+- View previous task updates.
+
+Each task must be associated with the correct project and group.
+
+Record who created, assigned, updated and submitted each task.
+
+---
+
+# 8. INDIVIDUAL CONTRIBUTION TRACKING
+
+This is one of the most important and distinctive features of LumiereTrack.
+
+The system must track the documented contributions of every member within a group project.
+
+Record:
+
+- Tasks assigned.
+- Tasks completed.
+- Tasks submitted.
+- Tasks approved.
+- Tasks awaiting review.
+- Tasks returned for revision.
+- Files submitted.
+- External links submitted.
+- Submission dates and times.
+- Revision history.
+- Peer reviews.
+- Professor feedback.
+
+### Individual contribution page
+
+Every group member must have a contribution page within the project.
+
+Display:
+
+- Member name.
+- Assigned responsibilities.
+- Completed tasks.
+- Pending tasks.
+- Approved submissions.
+- Revisions requested.
+- Feedback received.
+- Marks obtained.
+
+### Contribution comparison
+
+Create graphs that allow the group and authorised professor to compare documented contributions.
+
+Use clear and transparent measurements.
+
+IMPORTANT:
+
+Do not calculate contribution percentages merely from:
+- Number of clicks.
+- Time spent logged in.
+- Number of files uploaded.
+- Number of times a student opens the application.
+
+Use actual recorded task and submission information.
+
+Clearly distinguish task completion from academic quality.
+
+Do not claim that a contribution percentage measures a person's total effort or worth.
+
+Every displayed metric must have a meaningful calculation behind it.
+
+---
+
+# 9. PROJECT TIMELINE AND ACTIVITY HISTORY
+
+Every group project must have a chronological activity timeline.
+
+Record important activities such as:
+
+- Project creation.
+- Group member joining.
+- Task creation.
+- Task assignment.
+- Task status changes.
+- Contribution submissions.
+- Submission revisions.
+- Professor feedback.
+- Marks awarded.
+- Task approvals.
+- Project completion.
+
+Each activity must show:
+
+- Person responsible.
+- Action performed.
+- Date and time.
+- Related task or submission.
+
+The timeline should update when new activities occur.
+
+Preserve historical records instead of overwriting previous submissions or important changes.
+
+Create a visually appealing timeline that is easy to understand.
+
+---
+
+# 10. PROFESSOR DASHBOARD
+
+Create a completely separate dashboard for professors.
+
+It should have a professional teaching and assessment interface.
+
+### Professor overview
+
+Display:
+
+- Courses taught.
+- Active group assignments.
+- Number of groups.
+- Number of enrolled students.
+- Pending submissions.
+- Submissions awaiting review.
+- Projects requiring attention.
+- Upcoming deadlines.
+
+### Course overview
+
+For every course, allow professors to:
+
+- View group assignments.
+- View enrolled students.
+- View all project groups.
+- Monitor group progress.
+- View individual contributions.
+- Check pending submissions.
+- Review grading status.
+
+### Group monitoring
+
+When opening a group, professors should be able to see:
+
+- Group members.
+- Individual responsibilities.
+- Tasks completed.
+- Tasks pending.
+- Submitted contributions.
+- Submission evidence.
+- Activity timeline.
+- Individual contribution reports.
+- Overall project progress.
+
+Professors should be able to identify which members have submitted their assigned work and which still have outstanding tasks.
+
+---
+
+# 11. PROFESSOR REVIEW, FEEDBACK AND GRADING
+
+This is a mandatory fully functional feature.
+
+Professors must be able to review individual contributions and group project submissions.
+
+### Review actions
+
+Provide the following working actions:
+
+- Approve submission.
+- Request changes.
+- Add written feedback.
+- Attach supporting feedback files where possible.
+- Award marks.
+- View previous reviews.
+- View submission history.
+
+### Feedback
+
+Professors should be able to provide feedback linked to a particular submission or task.
+
+Students must be able to view the feedback in their project workspace.
+
+If corrections are requested, students must be able to submit a revised version.
+
+Keep the original submission, revised submission and feedback in the history.
+
+### Grading system
+
+Support both:
+
+1. Group marks.
+2. Individual student marks.
+
+Example:
+
+A professor may award the group 18/20 for the overall project but assign different individual marks depending on the assessment criteria.
+
+Each assignment should support its own grading rubric.
+
+A grading record should contain:
+
+- Student name.
+- Group name.
+- Assignment.
+- Marks obtained.
+- Maximum marks.
+- Feedback.
+- Grading professor.
+- Grading date.
+
+Allow professors to enter marks for individual students and group submissions.
+
+Students should only be able to view their own individual marks and authorised group-level results.
+
+Only authorised professors can publish or modify grades.
+
+---
+
+# 12. ANALYTICS, GRAPHS AND REPORTS
+
+Create a professional analytics section.
+
+All charts must reflect real database information.
+
+### Project-level analytics
+
+Display:
+
+- Overall project completion.
+- Tasks completed versus pending.
+- Submission approval rate.
+- Project timeline.
+- Group contribution distribution.
+
+### Individual analytics
+
+Display:
+
+- Tasks assigned.
+- Tasks completed.
+- Approved contributions.
+- Pending work.
+- Revisions requested.
+- Marks obtained.
+- Feedback history.
+
+### Visualisations
+
+Use appropriate:
+
+- Bar charts.
+- Donut charts.
+- Progress bars.
+- Activity timelines.
+- Contribution comparison graphs.
+
+Avoid unnecessary charts.
+
+Each graph must communicate useful information.
+
+### Project reports
+
+Allow users to generate a project report containing:
+
+- Project details.
+- Course information.
+- Group members.
+- Assigned responsibilities.
+- Completed tasks.
+- Contribution records.
+- Submission history.
+- Professor feedback.
+- Marks.
+
+Where feasible, support PDF export.
+
+---
+
+# 13. NOTIFICATIONS
+
+Create a functional in-app notification system.
+
+### Student notifications
+
+Notify students when:
+
+- They receive a new task.
+- A deadline is approaching.
+- A group member updates the project.
+- A professor reviews their submission.
+- New feedback is received.
+- A submission is returned for revision.
+- Marks are published.
+- A task is approved.
+
+### Professor notifications
+
+Notify professors when:
+
+- A group submits work.
+- A student submits a revision.
+- A project approaches its deadline.
+- A submission is awaiting review.
+
+Include:
+
+- Unread notification count.
+- Notification list.
+- Notification timestamps.
+- Read/unread status.
+- Links to the relevant task or submission.
+
+Notifications must be triggered by actual application events.
+
+---
+
+# 14. LUMIERETRACK AI ASSISTANT
+
+Include an AI-powered chatbot accessible through a floating chat icon throughout the application.
+
+The chatbot should be able to answer questions using the actual information available to the logged-in user.
+
+It must be context-aware.
+
+### Example student questions
+
+- How many days are left until my project deadline?
+- What tasks am I currently working on?
+- Which of my tasks are overdue?
+- What should I complete next?
+- How much of our group project is completed?
+- Who has not submitted their assigned task?
+- What feedback did my professor give me?
+- What marks did I receive?
+- Which submissions are waiting for professor review?
+- What are my upcoming deadlines across all courses?
+
+### Example professor questions
+
+- Which groups have not submitted their work?
+- Which submissions are waiting for my review?
+- Which projects are falling behind?
+- Which students have pending tasks?
+- What is the completion status of this group?
+- Which assignments have not been graded?
+
+### Chatbot requirements
+
+The chatbot must:
+
+- Retrieve data from the database.
+- Identify the logged-in user.
+- Understand the relevant course or project.
+- Calculate remaining time using actual deadlines.
+- Provide concise and useful answers.
+- Respect role-based permissions.
+- Never reveal unauthorised student information.
+- Never invent marks, deadlines, feedback or project data.
+
+If the requested information is unavailable, clearly explain that it cannot be found.
+
+The chatbot must not pretend to be a professor or award marks.
+
+If an external AI API is required, use environment variables for API keys and provide a clear fallback when the API is unavailable.
+
+The rest of LumiereTrack must continue working even if the chatbot is unavailable.
+
+---
+
+# 15. DATABASE AND BACKEND ARCHITECTURE
+
+Build a proper relational database.
+
+Suggested database entities:
+
+1. Users.
+2. Courses.
+3. Course_Members.
+4. Course_Instructors.
+5. Assignments.
+6. Groups.
+7. Group_Members.
+8. Tasks.
+9. Contributions.
+10. Submission_Versions.
+11. Reviews.
+12. Grades.
+13. Grading_Rubrics.
+14. Activity_Logs.
+15. Notifications.
+
+Ensure:
+
+- Proper foreign keys.
+- Appropriate relationships.
+- Input validation.
+- Secure authentication.
+- Role-based authorisation.
+- Persistent data storage.
+- Proper error handling.
+- Protected course and project access.
+- Correct data ownership.
+
+A group assignment must belong to one course.
+
+A group must belong to the correct assignment.
+
+Tasks must belong to the correct project.
+
+Contributions must be linked to the correct student and task.
+
+Reviews and grades must be linked to the correct submission, assignment and authorised professor.
+
+Use a maintainable full-stack architecture.
+
+Preferred stack:
+
+- React for frontend.
+- Tailwind CSS for styling.
+- A suitable backend and persistent relational database.
+- Secure authentication.
+- A suitable file-storage solution.
+
+Choose the simplest reliable stack supported by Replit.
+
+Do not introduce unnecessary infrastructure or microservices.
+
+---
+
+# 16. FUNCTIONALITY REQUIREMENTS – NO DEAD BUTTONS
+
+This requirement is extremely important.
+
+I do not want a beautiful website where the buttons do nothing.
+
+Every visible interactive element must have a real working function.
+
+This includes:
+
+- All navigation links.
+- All buttons.
+- All forms.
+- All dropdowns.
+- All filters.
+- Search functionality.
+- Profile editing.
+- Course creation.
+- Course enrolment.
+- Assignment creation.
+- Group invitations.
+- Task creation.
+- Task assignment.
+- Status updates.
+- File uploads.
+- Contribution submissions.
+- Feedback forms.
+- Grading controls.
+- Notification controls.
+- Chatbot interactions.
+- Reports and exports.
+
+Do not create decorative buttons.
+
+Do not use hardcoded sample numbers as real data.
+
+Do not create fake upload controls.
+
+Do not leave incomplete placeholder pages.
+
+Do not make charts that display fabricated values.
+
+If a feature cannot be implemented properly within the available development time, implement a simpler functional version or leave it out of the interface.
+
+All important information must persist after refreshing the application or logging out and logging back in.
+
+The application must support multiple independent user accounts.
+
+---
+
+# 17. DEVELOPMENT PRIORITIES
+
+Build the application in the following order.
+
+## Priority 1 – Core functionality
+
+These are the most important requirements.
+
+1. Student and professor authentication.
+2. Role-based dashboards.
+3. Course creation and enrolment.
+4. Group assignment creation.
+5. Group creation and joining.
+6. Task creation and assignment.
+7. Individual contribution submission.
+8. File and link attachments.
+9. Professor submission review.
+10. Professor feedback.
+11. Individual and group grading.
+12. Database persistence.
+
+## Priority 2 – Supporting functionality
+
+1. Project dashboard.
+2. Timeline.
+3. Contribution tracking.
+4. Progress percentages.
+5. Graphs.
+6. Notifications.
+7. Reports.
+
+## Priority 3 – Advanced functionality
+
+1. AI chatbot.
+2. Advanced analytics.
+3. PDF report export.
+
+Do not sacrifice the core working features to implement advanced features.
+
+---
+
+# 18. REQUIRED END-TO-END DEMONSTRATION
+
+The finished application must support the following complete workflow.
+
+**Step 1:** A student registers and logs in.
+
+**Step 2:** The student can view multiple enrolled courses, each with its own professor.
+
+**Step 3:** A professor logs in and creates a group assignment under one of their courses.
+
+**Step 4:** The professor sets the deadline, group size and grading criteria.
+
+**Step 5:** Students create or join a group using an invitation code.
+
+**Step 6:** Group members access the shared project workspace.
+
+**Step 7:** The group creates tasks and assigns responsibilities to individual members.
+
+**Step 8:** A student completes a task and submits their work with an explanation and supporting evidence.
+
+**Step 9:** The contribution appears in the project workspace and activity timeline.
+
+**Step 10:** Other group members can see the shared project update.
+
+**Step 11:** The professor sees the submission in their dashboard.
+
+**Step 12:** The professor reviews the work, adds written feedback and awards marks.
+
+**Step 13:** The professor approves the submission or requests corrections.
+
+**Step 14:** The student receives a notification and can view the feedback and marks.
+
+**Step 15:** The contribution report, project progress and graphs update automatically based on actual records.
+
+**Step 16:** The AI assistant can answer questions about tasks, progress and deadlines using real application data.
+
+Every step must work using separate student and professor accounts.
+
+---
+
+# 19. FINAL DEVELOPMENT AND TESTING INSTRUCTIONS
+
+Before building, establish:
+
+- Application architecture.
+- Database relationships.
+- Authentication flow.
+- Role permissions.
+- Page routes.
+- Reusable UI components.
+
+Build incrementally.
+
+Test each major feature before moving to the next.
+
+After implementation, test the entire application using separate student and professor accounts.
+
+Check that:
+
+- Data is saved correctly.
+- Information persists after refreshing.
+- Different courses remain separated.
+- Professors only access their authorised courses.
+- Students only access their authorised projects.
+- Individual contributions are correctly attributed.
+- Group marks and individual marks are handled separately.
+- Previous submissions remain accessible.
+- Feedback appears in the correct student's account.
+- Notifications are triggered correctly.
+- Graphs update from actual data.
+- No visible button or navigation element is non-functional.
+
+Fix errors before considering development complete.
+
+Do not stop after generating the frontend.
+
+Do not substitute a visual demonstration for actual functionality.
+
+If development time is limited, prioritise completing the two main workflows rather than displaying unfinished advanced features.
+
+---
+
+# FINAL PRODUCT OBJECTIVE
+
+Deliver **LumiereTrack**, a beautiful, professional and fully functional university group-project management platform.
+
+It must provide two essential capabilities:
+
+**1. Collaborative group-project management and individual contribution tracking.**
+
+Students must be able to work together, divide responsibilities, submit evidence, track progress and see their documented contributions.
+
+**2. Professor review, feedback and grading.**
+
+Professors must be able to monitor groups, review submissions, provide feedback, request corrections and award group and individual marks.
+
+The entire application must feel like one coherent, professionally designed product.
+
+Build for real usability, real data and real interactions.
+
+**A smaller, complete and reliable application is preferable to a large application full of unfinished features.**

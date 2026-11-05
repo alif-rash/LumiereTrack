@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "LumiereTrack"
+description = "University group-project collaboration, documented contributions, professor review and grading."
+version = "1.0.0"
+id = "artifacts/lumieretrack"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18178
+
+[services.development]
+run = "pnpm --filter @workspace/lumieretrack run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/lumieretrack", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/lumieretrack/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18178"
+BASE_PATH = "/"
