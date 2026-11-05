@@ -11,17 +11,42 @@ export const query: Query = (sql, values) => pool.query(sql, values);
 export function fail(message: string, status = 400): never {
   throw Object.assign(new Error(message), { status });
 }
+export async function resolveClerkAccount(q: Query, identity: {
+  id: string; email: string; name: string; emailVerified: boolean;
+}): Promise<Row> {
+  const existing=(await q("SELECT * FROM lt_users WHERE id=$1",[identity.id])).rows[0];
+  if(existing) return existing;
+  // A verified primary email proves ownership when Clerk gives the same person
+  // a different identity (for example, development versus published sign-in).
+  // Keep the application's original ID so all academic foreign keys remain intact.
+  if(!identity.emailVerified) fail("Please verify your email address before opening your workspace.",403);
+  const email=identity.email.trim().toLowerCase();
+  if(!email) fail("An email address is required.");
+  const owners=(await q("SELECT * FROM lt_users WHERE lower(email)=$1",[email])).rows;
+  if(owners.length===1) return owners[0]!;
+  if(owners.length>1) fail("This email matches more than one account. Account ownership must be resolved before continuing.",409);
+  const inserted=(await q(`INSERT INTO lt_users(id,name,email) VALUES($1,$2,$3)
+    ON CONFLICT DO NOTHING RETURNING *`,[identity.id,identity.name,email])).rows[0];
+  if(inserted) return inserted;
+  // Handles concurrent first requests as well as an existing email. Never
+  // overwrite the established profile, role, ID, or academic ownership.
+  const matches=(await q("SELECT * FROM lt_users WHERE id=$1 OR lower(email)=$2",[identity.id,email])).rows;
+  const own=matches.find(u=>u.id===identity.id);
+  if(own) return own;
+  if(matches.length===1) return matches[0]!;
+  fail("This email matches more than one account. Account ownership must be resolved before continuing.",409);
+}
 export async function currentUser(req: Request): Promise<Row> {
   const id = getAuth(req).userId;
   if (!id) fail("Please sign in to continue.", 401);
   let user = (await query("SELECT * FROM lt_users WHERE id=$1", [id])).rows[0];
   if (!user) {
     const clerk = await clerkClient.users.getUser(id);
-    const email = clerk.emailAddresses.find(e => e.id === clerk.primaryEmailAddressId)?.emailAddress;
-    if (!email) fail("An email address is required.", 400);
-    user = (await query(`INSERT INTO lt_users(id,name,email) VALUES($1,$2,$3)
-      ON CONFLICT(id) DO UPDATE SET email=EXCLUDED.email RETURNING *`,
-      [id, clerk.fullName || email.split("@")[0], email.toLowerCase()])).rows[0];
+    const primary=clerk.emailAddresses.find(e => e.id === clerk.primaryEmailAddressId);
+    if (!primary?.emailAddress) fail("An email address is required.", 400);
+    user=await resolveClerkAccount(query,{id,email:primary.emailAddress,
+      name:clerk.fullName||primary.emailAddress.split("@")[0],
+      emailVerified:primary.verification?.status==="verified"});
   }
   return user!;
 }
